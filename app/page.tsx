@@ -1,102 +1,228 @@
-import Image from "next/image";
+import {
+  CloudSun,
+  Droplets,
+  Leaf,
+  Settings2,
+  Sprout,
+  ThermometerSun,
+  Wind,
+} from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+
+const zones = [
+  {
+    name: "Greenhouse A",
+    crop: "Cherry tomato · Week 9",
+    tempC: 24.6,
+    humidityPct: 63,
+    soilPct: 72,
+    status: "Stable",
+    variant: "secondary" as const,
+  },
+  {
+    name: "NFT Bench 2",
+    crop: "Butter lettuce · Week 4",
+    tempC: 21.2,
+    humidityPct: 71,
+    soilPct: 58,
+    status: "Watch",
+    variant: "outline" as const,
+  },
+];
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="mx-auto flex min-h-dvh max-w-lg flex-col gap-6 px-4 pb-24 pt-6 sm:max-w-3xl sm:px-6 sm:pb-28 sm:pt-8 lg:max-w-5xl lg:gap-8 lg:pb-32">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="rounded-full px-3">
+              <Sprout className="size-3" aria-hidden />
+              Live sensors
+            </Badge>
+            <span className="text-muted-foreground text-xs tabular-nums sm:text-sm">
+              Updated 12:08 PM
+            </span>
+          </div>
+          <h1 className="font-heading text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
+            Farm overview
+          </h1>
+          <p className="text-muted-foreground max-w-prose text-sm sm:text-base">
+            Jeju smart farm · Mobile-first dashboard for climate, irrigation,
+            and crop zones.
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          <Button variant="outline" size="sm" className="rounded-full">
+            <CloudSun className="size-4" aria-hidden />
+            Weather
+          </Button>
+          <Button variant="outline" size="sm" className="rounded-full">
+            <Settings2 className="size-4" aria-hidden />
+            Alerts
+          </Button>
+        </div>
+      </header>
+
+      <section aria-labelledby="ambient-heading">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 id="ambient-heading" className="font-heading text-lg font-semibold">
+            Ambient
+          </h2>
+          <Badge variant="outline" className="rounded-full">
+            Outdoor · partly cloudy
+          </Badge>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card size="sm" className="shadow-sm ring-black/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <ThermometerSun className="text-chart-4 size-4" aria-hidden />
+                Temperature
+              </CardTitle>
+              <CardDescription>Inside canopy avg.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="font-heading text-3xl font-semibold tabular-nums">
+                23.1°C
+              </p>
+            </CardContent>
+          </Card>
+          <Card size="sm" className="shadow-sm ring-black/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Droplets className="text-chart-2 size-4" aria-hidden />
+                Humidity
+              </CardTitle>
+              <CardDescription>RH · sensors 3–6</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Progress value={67}>
+                <div className="flex w-full items-center gap-2">
+                  <ProgressLabel className="sr-only">Humidity</ProgressLabel>
+                  <ProgressValue />
+                </div>
+              </Progress>
+              <p className="text-muted-foreground mt-2 text-xs">
+                Target band 60–75%
+              </p>
+            </CardContent>
+          </Card>
+          <Card size="sm" className="shadow-sm ring-black/5 sm:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Wind className="text-chart-3 size-4" aria-hidden />
+                Airflow
+              </CardTitle>
+              <CardDescription>Ventilation inlet</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="font-heading text-3xl font-semibold tabular-nums">
+                1.4 m/s
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                Fans auto · Stage 2
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <Separator />
+
+      <section aria-labelledby="zones-heading" className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="zones-heading" className="font-heading text-lg font-semibold">
+              Zones
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Tap a zone on mobile to drill into irrigation schedules next.
+            </p>
+          </div>
+          <Button size="sm" className="rounded-full">
+            <Leaf className="size-4" aria-hidden />
+            Add sensor
+          </Button>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          {zones.map((zone) => (
+            <Card key={zone.name} className="shadow-sm ring-black/5">
+              <CardHeader className="border-b pb-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <CardTitle>{zone.name}</CardTitle>
+                    <CardDescription>{zone.crop}</CardDescription>
+                  </div>
+                  <Badge variant={zone.variant} className="rounded-full">
+                    {zone.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-4 pt-4">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                      Temp
+                    </p>
+                    <p className="font-heading mt-1 text-2xl font-semibold tabular-nums">
+                      {zone.tempC.toFixed(1)}°C
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Progress value={zone.humidityPct}>
+                      <div className="mb-2 flex w-full items-center justify-between gap-2">
+                        <ProgressLabel>Humidity</ProgressLabel>
+                        <ProgressValue />
+                      </div>
+                    </Progress>
+                  </div>
+                </div>
+                <div>
+                  <Progress value={zone.soilPct}>
+                    <div className="mb-2 flex w-full items-center justify-between gap-2">
+                      <ProgressLabel>Soil / substrate moisture</ProgressLabel>
+                      <ProgressValue />
+                    </div>
+                  </Progress>
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    Irrigate when moisture drops below 45% for more than 30 min.
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-wrap gap-2 border-t pt-4">
+                <Button size="sm" className="rounded-full">
+                  Irrigation
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full">
+                  Vent curve
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <footer className="text-muted-foreground mt-auto border-t pt-6 text-center text-xs sm:text-sm">
+        Progressive Web App · Install from your browser menu on mobile for a
+        full-screen farm console.
       </footer>
     </div>
   );
