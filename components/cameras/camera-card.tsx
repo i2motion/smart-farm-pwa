@@ -5,10 +5,15 @@ import { CameraStatusBadge } from "@/components/cameras/camera-status-badge";
 import type { CameraStatus, FarmCamera } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
 
+/** 정상 / 저하 / 미수신 — 왼쪽 강조·배경 톤을 상태별로 명확히 구분 */
 function statusAccent(status: CameraStatus) {
-  if (status === "online") return "border-l-primary bg-primary/[0.03]";
-  if (status === "degraded") return "border-l-amber-500 bg-amber-500/[0.04] dark:border-l-amber-400";
-  return "border-l-muted-foreground/40 bg-muted/30";
+  if (status === "online") {
+    return "border-l-emerald-500 bg-emerald-500/[0.06] dark:border-l-emerald-400 dark:bg-emerald-500/[0.08]";
+  }
+  if (status === "degraded") {
+    return "border-l-amber-500 bg-amber-500/[0.05] dark:border-l-amber-400 dark:bg-amber-500/[0.07]";
+  }
+  return "border-l-rose-500 bg-rose-500/[0.06] dark:border-l-rose-400 dark:bg-rose-950/30";
 }
 
 export function CameraCard({ camera }: { camera: FarmCamera }) {
@@ -26,9 +31,9 @@ export function CameraCard({ camera }: { camera: FarmCamera }) {
           <div
             className={cn(
               "flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-border/40",
-              camera.status === "online" && "bg-primary/10 text-primary",
-              camera.status === "degraded" && "bg-amber-500/10 text-amber-700 dark:text-amber-300",
-              offline && "bg-muted text-muted-foreground"
+              camera.status === "online" && "bg-emerald-500/12 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300",
+              camera.status === "degraded" && "bg-amber-500/10 text-amber-700 ring-amber-500/25 dark:text-amber-300",
+              offline && "bg-rose-500/12 text-rose-700 ring-rose-500/25 dark:text-rose-300"
             )}
           >
             <Video className="size-4 stroke-[1.5]" aria-hidden />

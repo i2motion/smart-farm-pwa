@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { AirVent, Fan, Flame, PanelRightOpen, Plus, SunMedium, Waves } from "lucide-react";
+import { AirVent, Droplets, Fan, Flame, PanelRightOpen, Plus, SunMedium, Waves } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -72,7 +72,8 @@ export type ControlButtonGroupKey =
   | "sideWindow"
   | "flowFan"
   | "hotAirBlower"
-  | "exhaustFan";
+  | "exhaustFan"
+  | "sprayer";
 
 const DEFAULT_KEYS: ControlButtonGroupKey[] = ["irrigation", "skylight", "sideWindow"];
 
@@ -83,6 +84,7 @@ const KEY_TO_OPERATION: Record<ControlButtonGroupKey, OperationSchedule["kind"]>
   flowFan: "flowFan",
   hotAirBlower: "hotAirBlower",
   exhaustFan: "exhaustFan",
+  sprayer: "sprayer",
 };
 
 export type ControlScheduleSlotProps = {
@@ -184,12 +186,14 @@ export function ControlButtonGroup({
   flowFanOn = false,
   hotAirBlowerOn = false,
   exhaustFanOn = false,
+  sprayerOn = false,
   onIrrigationChange,
   onSkylightChange,
   onSideWindowChange,
   onFlowFanChange,
   onHotAirBlowerChange,
   onExhaustFanChange,
+  onSprayerChange,
   visible = DEFAULT_KEYS,
   schedule,
   className,
@@ -200,12 +204,14 @@ export function ControlButtonGroup({
   flowFanOn?: boolean;
   hotAirBlowerOn?: boolean;
   exhaustFanOn?: boolean;
+  sprayerOn?: boolean;
   onIrrigationChange: (next: boolean) => void;
   onSkylightChange: (next: boolean) => void;
   onSideWindowChange: (next: boolean) => void;
   onFlowFanChange?: (next: boolean) => void;
   onHotAirBlowerChange?: (next: boolean) => void;
   onExhaustFanChange?: (next: boolean) => void;
+  onSprayerChange?: (next: boolean) => void;
   visible?: readonly ControlButtonGroupKey[];
   /** 온실 상세: 구분별 스케줄 등록·이름 선택 */
   schedule?: ControlScheduleBundle;
@@ -307,6 +313,18 @@ export function ControlButtonGroup({
           inactiveLabel="끄기"
           onActive={() => onExhaustFanChange(true)}
           onInactive={() => onExhaustFanChange(false)}
+        />
+      ) : null}
+      {show.has("sprayer") && onSprayerChange ? (
+        <ControlPair
+          icon={Droplets}
+          label="분무기"
+          scheduleSlot={slot("sprayer", "분무기")}
+          active={sprayerOn}
+          activeLabel="켜기"
+          inactiveLabel="끄기"
+          onActive={() => onSprayerChange(true)}
+          onInactive={() => onSprayerChange(false)}
         />
       ) : null}
     </div>

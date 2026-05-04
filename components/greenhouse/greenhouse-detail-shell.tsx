@@ -26,6 +26,7 @@ function keyToOperationKind(key: ControlButtonGroupKey): OperationKind {
     flowFan: "flowFan",
     hotAirBlower: "hotAirBlower",
     exhaustFan: "exhaustFan",
+    sprayer: "sprayer",
   };
   return m[key];
 }
@@ -93,10 +94,12 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
   const [irrigationOn, setIrrigationOn] = useState(zone.irrigationRunning);
   const [skylightOpen, setSkylightOpen] = useState(zone.skylightOpen);
   const [sideWindowOpen, setSideWindowOpen] = useState(zone.sideWindowOpen);
-  const initialFans = MOCK_GREENHOUSE_FAN_ACTUATORS[zone.id] ?? { flowFan: false, hotAirBlower: false, exhaustFan: false };
+  const initialFans =
+    MOCK_GREENHOUSE_FAN_ACTUATORS[zone.id] ?? { flowFan: false, hotAirBlower: false, exhaustFan: false, sprayer: false };
   const [flowFanOn, setFlowFanOn] = useState(initialFans.flowFan);
   const [hotAirBlowerOn, setHotAirBlowerOn] = useState(initialFans.hotAirBlower);
   const [exhaustFanOn, setExhaustFanOn] = useState(initialFans.exhaustFan);
+  const [sprayerOn, setSprayerOn] = useState(initialFans.sprayer);
 
   const [sensorAlarms, setSensorAlarms] = useState<SensorAlarmRule[]>([]);
   const [schedules, setSchedules] = useState<OperationSchedule[]>([]);
@@ -129,12 +132,14 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
     flowFanOn,
     hotAirBlowerOn,
     exhaustFanOn,
+    sprayerOn,
     onIrrigationChange: setIrrigationOn,
     onSkylightChange: setSkylightOpen,
     onSideWindowChange: setSideWindowOpen,
     onFlowFanChange: setFlowFanOn,
     onHotAirBlowerChange: setHotAirBlowerOn,
     onExhaustFanChange: setExhaustFanOn,
+    onSprayerChange: setSprayerOn,
   };
 
   return (
@@ -203,7 +208,7 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
         </div>
         <ControlButtonGroup
           {...actuators}
-          visible={["irrigation", "skylight", "sideWindow", "flowFan", "hotAirBlower", "exhaustFan"]}
+          visible={["irrigation", "skylight", "sideWindow", "flowFan", "hotAirBlower", "exhaustFan", "sprayer"]}
           className="max-w-xl"
           schedule={{
             schedules,
@@ -267,10 +272,8 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
         onSaveRegister={(row) => {
           setSchedules((prev) => [...prev, row]);
           setScheduleDialog(null);
-          if (row.kind !== "sprayer") {
-            const k = row.kind as ControlButtonGroupKey;
-            setSchedulePick((p) => ({ ...p, [k]: row.id }));
-          }
+          const k = row.kind as ControlButtonGroupKey;
+          setSchedulePick((p) => ({ ...p, [k]: row.id }));
         }}
         onSaveEdit={(row) => {
           setSchedules((prev) => prev.map((s) => (s.id === row.id ? row : s)));

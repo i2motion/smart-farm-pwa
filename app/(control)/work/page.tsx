@@ -19,9 +19,6 @@ export default function WorkPage() {
           <p className="sf-page-sub">지시·점검 작업 목록 · 목업</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/alarms" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "rounded-xl")}>
-            알람
-          </Link>
           <Link href="/dashboard" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-xl")}>
             대시보드
           </Link>

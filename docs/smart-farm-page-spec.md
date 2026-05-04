@@ -11,21 +11,23 @@
 |------|------|
 | 앱 셸 | `app/(control)/layout.tsx` — `ControlCenterShell`, 사이드바·모바일 스트립 내비 |
 | 내비 정의 | `lib/navigation/control-nav-links.ts` — 한글 라벨 · 경로는 영어 |
-| 목업 데이터 | `lib/dashboard/mock-data.ts`, `lib/dashboard/types.ts` |
+| 목업 데이터 | `lib/dashboard/mock-data.ts`, `lib/dashboard/types.ts`, `lib/devices/mock-data.ts`, `lib/devices/types.ts` |
 | 스타일 | 모던 블루 산업 IoT / SaaS형 서피스 (`sf-surface` 등) |
 
 ### 페이지·라우트·한글 내비 라벨
 
 | # | 경로 (English) | UI 라벨 (한국어) |
 |---|----------------|------------------|
-| 1 | `/dashboard` | 실시간 모니터링 |
+| 1 | `/dashboard` | 대시보드 |
 | 2 | `/cameras` | 카메라 |
-| 3 | `/auto-manual` | 자동/수동 |
-| 4 | `/sensors` | 센서 |
-| 5 | `/devices` | 장비 |
-| 6 | `/alarms-work` | 알람/작업 |
+| 3 | `/devices` | 장비 |
+| 4 | `/alarms` | 알람 |
+| 5 | `/work` | 작업 |
+| 6 | `/weather` | 날씨 |
 | 7 | `/auction` | 경매 |
 | 8 | `/settings` | 설정 |
+
+구 경로(호환): `/auto-manual` → `redirect` 로 `/devices` · `/sensors` → `/dashboard`.
 
 ---
 
@@ -116,128 +118,79 @@
 
 ---
 
-## 3. Auto/Manual Control — 자동/수동 (`/auto-manual`)
+## 3. Auto/Manual — 통합 안내 (독립 라우트 없음)
+
+- **내비에서 제거.** 이전 `/auto-manual` 은 **`/devices` 로 redirect** (호환).
+- **자동/수동 모드** 및 **전체·동별 구동**은 아래 **§5 Devices** 에서 목업으로 처리.
+- 스케줄·온실별 세부 구동 UI는 **`/greenhouses/[id]`** 온실 상세(구동 제어 카드)와 병행.
+
+---
+
+## 4. Sensors — 통합 안내 (독립 목록 페이지 없음)
+
+- **내비에서 제거.** 이전 `/sensors` 는 **`/dashboard` 로 redirect** (호환).
+- **센서 요약·환경 비교**는 대시보드(`environment-section` 등).
+- **센서 추세·알람 임계**는 온실 상세(`greenhouse-detail-shell`, `SensorSummary`, 추세 패널 등).
+
+### 향후 API (Future API requirements)
+
+- `GET /sensors`, `GET /sensors/{id}/readings?...` 등은 온실·대시보드 위젯 소비 형태로 재사용.
+
+---
+
+## 5. Devices — 장비 · 구동 센터 (`/devices`)
 
 ### 목적 (Purpose)
 
-- **상위 모드**(플릿/존 자동·수동 정책), 스케줄·자동화 규칙 진입.
-- 개별 모터·릴레이 **현장 디테일 제어**는 장비 페이지와 역할 분리.
+- **전장(7동) 수동/자동 제어 허브**: 플릿 일괄 + 온실별 패널.
+- 관수·천창·측창·유동팬·온풍기·분무기 ON/OFF(또는 열기/닫기) — **목업 로컬 state 만** 갱신.
+- 자동 모드 동에서도 수동 버튼은 표시하되 **주의(시각적 경고)** 안내.
 
 ### 표시 항목 (Display items)
 
 | 한글 | 내용 |
 |------|------|
-| 상위 제어 모드 | 자동 / 수동 선택(목업), 설명 문구 |
-| 스케줄 | 편집기 플레이스홀더 |
-| 자동화 규칙 | 규칙 엔진 플레이스홀더 |
+| 전체 제어 | 전체 자동/수동, 전체 관수·천창·측창·유동팬·온풍기·분무기 |
+| 온실 패널(×7) | 동명, 작물, 종합 상태, 현재 모드(자동/수동), 모드 선택, 구동 행, 마지막 명령 시각·요약 |
+| 전체 마지막 명령 | 일괄 조작 시 타임스탬프·요약 문구 |
 
 ### 조작 (Control actions)
 
 | 동작 | 비고 |
 |------|------|
-| 자동·수동 전환 | 목업 상태 토글 |
-| 스케줄·규칙 편집 | 미구현 · 향후 CRUD |
+| 모드·구동 토글 | 로컬 state; 고위험 일괄(관수 ON, 천창/측창 열기, 온풍기/분무기 ON 등)는 확인 대화상자(목업) |
+| 온실 상세 이동 | 패널 제목 링크 → `/greenhouses/[id]` |
 
 ### 필요 목업 데이터 (Mock data needed)
 
 | 데이터 | 출처 |
 |--------|------|
-| 플릿 모드 등 | 컴포넌트 로컬 state 또는 향후 `MOCK_SUPERVISORY_MODE` 도입 |
+| 초기 7동 스냅샷 | `MOCK_GREENHOUSES`, `MOCK_GREENHOUSE_FAN_ACTUATORS` → `buildInitialDeviceRows()` (`lib/devices/mock-data.ts`) |
+
+### 주요 UI 컴포넌트 (코드)
+
+- `components/devices/devices-page-shell.tsx` — 페이지 상태·확인창
+- `components/devices/global-control-panel.tsx` — 전체 제어
+- `components/devices/greenhouse-device-panel.tsx` — 동별 카드
+- `components/devices/device-control-button.tsx`, `mode-selector.tsx`, `devices-confirm-dialog.tsx`
 
 ### 향후 API (Future API requirements)
 
-- `PATCH /fleet/mode` 또는 `PATCH /zones/{id}/mode`
-- `GET/POST/PUT /schedules`
-- `GET/POST/PUT /automation-rules`
+- `PATCH /fleet/mode`, `PATCH /zones/{id}/mode`
+- `POST /zones/{id}/actuators/{kind}/command` 또는 통합 명령 API
+- `GET /zones/{id}/actuator-state`
 
 ### 개발 우선순위 (Development priority)
 
-- **P1** — 모드·스케줄·규칙 데이터 모델 분리
+- **P1** — 실연동 시 명령 큐·인터록·권한과 정합
+
+### 레거시 참고
+
+- `components/devices/fleet-device-controls.tsx` — 초기 프로토타입(릴레이 뱅크 등); 현재 메인 UX는 위 셸·패널 구조.
 
 ---
 
-## 4. Sensors — 센서 (`/sensors`)
-
-### 목적 (Purpose)
-
-- 시계열·차트·관측 채널 상세, **대표 센서·임계 설정**(향후).
-- 대시보드 환경 블록은 요약만; 본 페이지는 탐색·설정 중심.
-
-### 표시 항목 (Display items)
-
-| 한글 | 내용 |
-|------|------|
-| (현재) 플레이스홀더 | 안내 문구만 |
-| (향후) 차트 영역 | 시계열 목업 |
-| (향후) 채널 목록 | 이름·위치·현재값 |
-| (향후) 임계 설정 | 알람 규칙과 연계 가능 |
-
-### 조작 (Control actions)
-
-| 동작 | 비고 |
-|------|------|
-| 기간·채널 선택 | 미구현 |
-| 임계 저장 | 미구현 → API 후 |
-
-### 필요 목업 데이터 (Mock data needed)
-
-| 데이터 | 출처 |
-|--------|------|
-| 시계열 | 향후 `MOCK_SENSOR_SERIES` 또는 기존 `MOCK_CLIMATE_SENSORS` 확장 |
-| 채널 메타 | `MOCK_CLIMATE_SENSORS` 재사용 가능 |
-
-### 향후 API (Future API requirements)
-
-- `GET /sensors`, `GET /sensors/{id}`
-- `GET /sensors/{id}/readings?from=&to=&resolution=`
-- `PUT /sensors/{id}/thresholds`
-
-### 개발 우선순위 (Development priority)
-
-- **P2** — 차트 라이브러리·시계열 API 확정 후
-
----
-
-## 5. Devices — 장비 (`/devices`)
-
-### 목적 (Purpose)
-
-- 관수·천창·측면창·팬·릴레이 등 **액추에이터·회선** 단위 제어 (목업 토글).
-- 자동/수동 화면은 정책; 본 페이지는 **현장 장비 제어**.
-
-### 표시 항목 (Display items)
-
-| 한글 | 내용 |
-|------|------|
-| 관수 / 천창 / 측면창 | 구역별 토글 그룹(목업) |
-| 팬 | 가동 토글 |
-| 릴레이 | R1–R4 토글 |
-
-### 조작 (Control actions)
-
-| 동작 | 비고 |
-|------|------|
-| ON/OFF·열림/닫기 | 로컬 목업 |
-| (향후) 명령 결과·인터록 | 서버 검증 |
-
-### 필요 목업 데이터 (Mock data needed)
-
-| 데이터 | 출처 |
-|--------|------|
-| 장비 상태 | 컴포넌트 로컬 state · 향후 `MOCK_ACTUATORS` |
-
-### 향후 API (Future API requirements)
-
-- `GET /actuators`, `POST /actuators/{id}/command`
-- `GET /relays`, `POST /relays/{id}/set`
-
-### 개발 우선순위 (Development priority)
-
-- **P1** — 장비 타입·존 매핑 후 Auto/Manual과 문서 정합
-
----
-
-## 6. Alarms & Work — 알람/작업 (`/alarms-work`)
+## 6. Alarms & Work — 알람 · 작업 (`/alarms`, `/work`)
 
 ### 목적 (Purpose)
 
@@ -278,7 +231,21 @@
 
 ---
 
-## 7. Auction — 경매 (`/auction`)
+## 7. Weather — 날씨 (`/weather`)
+
+### 목적 (Purpose)
+
+- 실외·시간대별 예보 요약(목업).
+
+### 필요 목업 데이터 (Mock data needed)
+
+| 데이터 | 출처 |
+|--------|------|
+| 예보 | `MOCK_WEATHER`, `MOCK_WEATHER_HOURLY` 등 (`lib/dashboard/mock-data.ts`) |
+
+---
+
+## 8. Auction — 경매 (`/auction`)
 
 ### 목적 (Purpose)
 
@@ -310,7 +277,7 @@
 
 ---
 
-## 8. Settings — 설정 (`/settings`)
+## 9. Settings — 설정 (`/settings`)
 
 ### 목적 (Purpose)
 
@@ -355,10 +322,12 @@
 | 대시보드 뷰 | `components/dashboard/dashboard-shell.tsx`, `farm-overview.tsx`, `greenhouse-grid.tsx`, `environment-section.tsx`, `environment-compare.tsx`, `latest-alarm.tsx` |
 | 온실 상세·구동 스케줄(목업) | `app/(control)/greenhouses/[id]/page.tsx`, `components/greenhouse/greenhouse-detail-shell.tsx`, `components/dashboard/control-button-group.tsx`, `operation-schedule-modal.tsx`, `lib/greenhouse/types.ts` |
 | 카메라 페이지 | `app/(control)/cameras/page.tsx` |
-| 자동/수동 | `app/(control)/auto-manual/page.tsx`, `components/auto-manual/auto-manual-panel.tsx` |
-| 센서 | `app/(control)/sensors/page.tsx` |
-| 장비 | `app/(control)/devices/page.tsx`, `components/devices/fleet-device-controls.tsx` |
-| 알람/작업 | `app/(control)/alarms-work/page.tsx`, `recent-alarms.tsx`, `work-instructions.tsx` |
+| 자동/수동(redirect) | `app/(control)/auto-manual/page.tsx` → `/devices` |
+| 센서(redirect) | `app/(control)/sensors/page.tsx` → `/dashboard` |
+| 장비 · 구동 센터 | `app/(control)/devices/page.tsx`, `components/devices/devices-page-shell.tsx`, `global-control-panel.tsx`, `greenhouse-device-panel.tsx`, `lib/devices/*` |
+| 알람·작업 | `app/(control)/alarms/page.tsx`, `app/(control)/work/page.tsx` (및 `alarms-work` 레거시 라우트가 있으면 별도) |
+| 날씨 | `app/(control)/weather/page.tsx` |
+| 자동/수동 UI(레거시 컴포넌트) | `components/auto-manual/auto-manual-panel.tsx` (필요 시 재사용) |
 | 목업 | `lib/dashboard/mock-data.ts`, `lib/dashboard/types.ts` |
 
 ---
@@ -368,8 +337,8 @@
 | 순위 | 범위 |
 |------|------|
 | **P0** | Dashboard 요약 전용, 내비·목업 일관성 |
-| **P1** | Cameras·Devices·Auto-Manual·Alarms 목록/제어 스코프 |
-| **P2** | Sensors 차트·임계, Settings, 알람 규칙 UI |
+| **P1** | Cameras·Devices(구동 허브)·Alarms/Work 목록/제어 스코프 |
+| **P2** | 온실 상세 센서 차트·임계, Settings, 알람 규칙 UI |
 | **P3** | Auction |
 
 ---

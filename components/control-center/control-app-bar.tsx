@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { DashboardAlarmStatusStrip } from "@/components/dashboard/dashboard-alarm-status-strip";
+import { DashboardWorkStatusStrip } from "@/components/dashboard/dashboard-work-status-strip";
 import { DashboardToolbar } from "@/components/dashboard-toolbar";
-import { MOCK_FARM_META, MOCK_LATEST_ALARM } from "@/lib/dashboard/mock-data";
+import { MOCK_FARM_META, MOCK_LATEST_ALARM, MOCK_LATEST_WORK_INSTRUCTION } from "@/lib/dashboard/mock-data";
 
 function formatTime(d: Date): string {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -78,9 +79,14 @@ export function ControlAppBar() {
           <DashboardToolbar />
         </div>
         {showDashboardAlarm ? (
-          <div className="border-t border-white/[0.05] bg-black/15 px-2 py-1 md:px-6 md:py-1.5 lg:px-8">
-            <DashboardAlarmStatusStrip alarm={MOCK_LATEST_ALARM} />
-          </div>
+          <>
+            <div className="border-t border-white/[0.05] bg-black/15 px-2 py-1 md:px-6 md:py-1.5 lg:px-8">
+              <DashboardAlarmStatusStrip alarm={MOCK_LATEST_ALARM} />
+            </div>
+            <div className="border-t border-white/[0.05] bg-black/15 px-2 py-1 md:px-6 md:py-1.5 lg:px-8">
+              <DashboardWorkStatusStrip work={MOCK_LATEST_WORK_INSTRUCTION} />
+            </div>
+          </>
         ) : null}
       </header>
     </>

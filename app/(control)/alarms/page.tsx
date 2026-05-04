@@ -19,9 +19,6 @@ export default function AlarmsPage() {
           <p className="sf-page-sub">미처리·최근 알람 목록 · 목업</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/work" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "rounded-xl")}>
-            작업
-          </Link>
           <Link href="/dashboard" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-xl")}>
             대시보드
           </Link>

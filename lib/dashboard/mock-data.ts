@@ -286,8 +286,13 @@ export const MOCK_GREENHOUSE_SENSOR_EXTRA: Record<string, GreenhouseSensorExtra>
   "gh-07": { ecMScm: 2.1, ph: 5.7, waterTankPct: 55 },
 };
 
-/** 온실 상세 — 유동팬·온풍기·배기팬 초기 상태(목업) */
-export type GreenhouseFanActuators = { flowFan: boolean; hotAirBlower: boolean; exhaustFan: boolean };
+/** 온실 상세 — 유동팬·온풍기·배기팬·분무기 초기 상태(목업) */
+export type GreenhouseFanActuators = {
+  flowFan: boolean;
+  hotAirBlower: boolean;
+  exhaustFan: boolean;
+  sprayer: boolean;
+};
 
 const LEGACY_FAN_ON: Record<string, boolean> = {
   "gh-01": false,
@@ -299,8 +304,21 @@ const LEGACY_FAN_ON: Record<string, boolean> = {
   "gh-07": false,
 };
 
+const SPRAYER_INITIAL: Record<string, boolean> = {
+  "gh-01": false,
+  "gh-02": false,
+  "gh-03": true,
+  "gh-04": false,
+  "gh-05": false,
+  "gh-06": false,
+  "gh-07": true,
+};
+
 export const MOCK_GREENHOUSE_FAN_ACTUATORS: Record<string, GreenhouseFanActuators> = Object.fromEntries(
-  Object.entries(LEGACY_FAN_ON).map(([id, flowFan]) => [id, { flowFan, hotAirBlower: false, exhaustFan: false }])
+  Object.entries(LEGACY_FAN_ON).map(([id, flowFan]) => [
+    id,
+    { flowFan, hotAirBlower: false, exhaustFan: false, sprayer: SPRAYER_INITIAL[id] ?? false },
+  ])
 ) as Record<string, GreenhouseFanActuators>;
 
 export type GreenhouseTrendSeries = {
@@ -491,3 +509,7 @@ export const MOCK_WORK_INSTRUCTIONS: WorkInstruction[] = [
     status: "done",
   },
 ];
+
+/** 대시보드 상단 작업 스트립용 — 진행 중 우선, 없으면 목록 첫 행 */
+export const MOCK_LATEST_WORK_INSTRUCTION: WorkInstruction =
+  MOCK_WORK_INSTRUCTIONS.find((w) => w.status === "in-progress") ?? MOCK_WORK_INSTRUCTIONS[0]!;

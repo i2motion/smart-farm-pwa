@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardCameraPreview } from "@/components/dashboard/dashboard-camera-preview";
+import { DashboardDevicesModeEntry } from "@/components/dashboard/dashboard-devices-mode-entry";
 import { DashboardWeatherCard } from "@/components/dashboard/dashboard-weather-card";
 import { GreenhouseGrid } from "@/components/dashboard/greenhouse-grid";
 import {
@@ -28,6 +29,8 @@ export function DashboardShell() {
         sunset={MOCK_DASHBOARD_SKY.sunset}
         sensor={sensor}
       />
+
+      <DashboardDevicesModeEntry />
 
       <GreenhouseGrid zones={MOCK_GREENHOUSES} />
     </div>
