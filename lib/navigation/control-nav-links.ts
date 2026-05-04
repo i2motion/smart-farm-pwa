@@ -1,5 +1,5 @@
 /**
- * Control center navigation — single source for desktop sidebar + mobile strip.
+ * Control center navigation — 사이드바 등에서 재사용 시 목록·라벨 단일 소스.
  * 자동/수동·현장 구동은 `/devices`에서 통합. 센서 상세는 대시보드 요약 + 온실 상세.
  */
 export const CONTROL_NAV_LINKS = [
