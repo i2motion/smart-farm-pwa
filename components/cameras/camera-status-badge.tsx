@@ -7,7 +7,7 @@ export function CameraStatusBadge({ status }: { status: CameraStatus }) {
   if (status === "online") {
     return (
       <Badge className="rounded-md border-0 bg-primary/14 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/18">
-        온라인
+        정상
       </Badge>
     );
   }
@@ -23,7 +23,7 @@ export function CameraStatusBadge({ status }: { status: CameraStatus }) {
   }
   return (
     <Badge variant="secondary" className="rounded-md px-2 py-0.5 text-[11px] font-medium">
-      오프라인
+      미수신
     </Badge>
   );
 }

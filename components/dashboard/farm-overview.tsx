@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Bot, Cpu, Hand, TriangleAlert } from "lucide-react";
+import { Cpu, TriangleAlert } from "lucide-react";
 
 import type { FarmMetaSnapshot } from "@/lib/dashboard/mock-data";
 import type { GreenhouseZone } from "@/lib/dashboard/types";
@@ -28,8 +28,6 @@ export function FarmOverview({
   zones: GreenhouseZone[];
   className?: string;
 }) {
-  const auto = zones.filter((z) => z.mode === "AUTO").length;
-  const manual = zones.filter((z) => z.mode === "MANUAL").length;
   const activeAlarms =
     meta.openAlarms.critical + meta.openAlarms.warning + meta.openAlarms.info;
   const status = overallLabel(zones);
@@ -44,8 +42,6 @@ export function FarmOverview({
     valueClass?: string;
   }[] = [
     { key: "overall", label: "전체", value: status, sub: "시설 상태", valueClass: tone },
-    { key: "auto", label: "자동", value: String(auto), sub: "존", Icon: Bot },
-    { key: "manual", label: "수동", value: String(manual), sub: "존", Icon: Hand },
     {
       key: "alarms",
       label: "알람",
@@ -53,7 +49,7 @@ export function FarmOverview({
       sub: "미처리",
       Icon: TriangleAlert,
     },
-    { key: "devices", label: "장비", value: String(meta.onlineDevices), sub: "온라인", Icon: Cpu },
+    { key: "devices", label: "장비", value: String(meta.onlineDevices), sub: "등록 기기", Icon: Cpu },
   ];
 
   return (
@@ -66,7 +62,7 @@ export function FarmOverview({
         <p className="text-muted-foreground mt-2 text-[13px] sm:mt-0">목업 텔레메트리</p>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         {tiles.map((t) => {
           const Icon = t.Icon;
           return (

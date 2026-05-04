@@ -6,14 +6,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { CameraStatus, FarmCamera } from "@/lib/dashboard/types";
+import type { FarmCamera } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
-
-function statusOverlayLabel(status: CameraStatus) {
-  if (status === "online") return "온라인";
-  if (status === "degraded") return "저하";
-  return "오프라인";
-}
 
 function PreviewSlide({ cam, cameraNumber }: { cam: FarmCamera; cameraNumber: number }) {
   const offline = cam.status === "offline";
@@ -45,7 +39,6 @@ function PreviewSlide({ cam, cameraNumber }: { cam: FarmCamera; cameraNumber: nu
         <p className="mt-0 truncate text-[15px] font-semibold leading-tight tracking-tight text-white/95 md:mt-0.5 md:text-[17px]">
           {cam.name}
         </p>
-        <p className="mt-0 text-[12px] font-medium leading-tight text-white/55 md:mt-0.5 md:text-[13px]">{statusOverlayLabel(cam.status)}</p>
       </div>
 
       {!offline ? (

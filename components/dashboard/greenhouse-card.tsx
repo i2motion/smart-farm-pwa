@@ -5,22 +5,8 @@ import { Waves, Warehouse } from "lucide-react";
 import Link from "next/link";
 
 import { sideWindowLayout, zoneNumber } from "@/lib/dashboard/greenhouse-vent-rules";
-import type { ControlMode, GreenhouseZone } from "@/lib/dashboard/types";
+import type { GreenhouseZone } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
-
-function ModePill({ mode }: { mode: ControlMode }) {
-  const auto = mode === "AUTO";
-  return (
-    <span
-      className={cn(
-        "shrink-0 rounded-full border border-white/[0.08] px-1.5 py-px text-[10px] font-semibold tracking-wide md:px-2.5 md:py-0.5 md:text-[12px] lg:px-2 lg:text-[11px]",
-        auto ? "border-primary/25 bg-primary/[0.08] text-primary" : "border-white/[0.1] bg-white/[0.05] text-muted-foreground"
-      )}
-    >
-      {auto ? "자동" : "수동"}
-    </span>
-  );
-}
 
 function ActuatorChip({
   active,
@@ -77,19 +63,16 @@ export function GreenhouseCard({
         className
       )}
     >
-      <div className="flex items-start justify-between gap-1 md:gap-3">
-        <div className="flex min-w-0 gap-1 md:gap-3">
-          <Warehouse className="mt-0 size-3 shrink-0 stroke-[1] text-muted-foreground transition-colors duration-200 group-hover:text-primary md:mt-0.5 md:size-4" aria-hidden />
-          <div className="min-w-0 leading-tight">
-            <h2 className="truncate text-[15px] font-semibold tracking-tight text-foreground md:text-[17px] lg:text-[16px]">
-              {zone.name}
-            </h2>
-            <p className="text-muted-foreground mt-0 line-clamp-1 text-[12px] leading-snug md:mt-0.5 md:text-[14px]">
-              {zone.crop}
-            </p>
-          </div>
+      <div className="flex items-start gap-1 md:gap-3">
+        <Warehouse className="mt-0 size-3 shrink-0 stroke-[1] text-muted-foreground transition-colors duration-200 group-hover:text-primary md:mt-0.5 md:size-4" aria-hidden />
+        <div className="min-w-0 flex-1 leading-tight">
+          <h2 className="truncate text-[15px] font-semibold tracking-tight text-foreground md:text-[17px] lg:text-[16px]">
+            {zone.name}
+          </h2>
+          <p className="text-muted-foreground mt-0 line-clamp-1 text-[12px] leading-snug md:mt-0.5 md:text-[14px]">
+            {zone.crop}
+          </p>
         </div>
-        <ModePill mode={zone.mode} />
       </div>
 
       {zone.status.trim() ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { PanelRightOpen, SunMedium, Waves } from "lucide-react";
+import { Fan, PanelRightOpen, SunMedium, Waves } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ function ControlPair({
   );
 }
 
-export type ControlButtonGroupKey = "irrigation" | "skylight" | "sideWindow";
+export type ControlButtonGroupKey = "irrigation" | "skylight" | "sideWindow" | "fan";
 
 const DEFAULT_KEYS: ControlButtonGroupKey[] = ["irrigation", "skylight", "sideWindow"];
 
@@ -69,18 +69,22 @@ export function ControlButtonGroup({
   irrigationOn,
   skylightOpen,
   sideWindowOpen,
+  fanOn = false,
   onIrrigationChange,
   onSkylightChange,
   onSideWindowChange,
+  onFanChange,
   visible = DEFAULT_KEYS,
   className,
 }: {
   irrigationOn: boolean;
   skylightOpen: boolean;
   sideWindowOpen: boolean;
+  fanOn?: boolean;
   onIrrigationChange: (next: boolean) => void;
   onSkylightChange: (next: boolean) => void;
   onSideWindowChange: (next: boolean) => void;
+  onFanChange?: (next: boolean) => void;
   /** Subset for pages that split actuators into separate cards */
   visible?: readonly ControlButtonGroupKey[];
   className?: string;
@@ -121,6 +125,17 @@ export function ControlButtonGroup({
         onActive={() => onSideWindowChange(true)}
         onInactive={() => onSideWindowChange(false)}
       />
+      ) : null}
+      {show.has("fan") && onFanChange ? (
+        <ControlPair
+          icon={Fan}
+          label="환기 팬"
+          active={fanOn}
+          activeLabel="켜기"
+          inactiveLabel="끄기"
+          onActive={() => onFanChange(true)}
+          onInactive={() => onFanChange(false)}
+        />
       ) : null}
     </div>
   );

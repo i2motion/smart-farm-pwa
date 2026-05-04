@@ -54,6 +54,38 @@ export const MOCK_CAMERAS: FarmCamera[] = [
     aiLabel: "사용 불가",
     imageUrl: "/cameras/camera-3.png",
   },
+  {
+    id: "cam-104",
+    name: "1동 · 관리동 출입",
+    status: "online",
+    resolution: "1920×1080",
+    aiLabel: "대기 · 목업",
+    imageUrl: "/cameras/camera-1.png",
+  },
+  {
+    id: "cam-105",
+    name: "3동 · 딸기 베드 A",
+    status: "online",
+    resolution: "1920×1080",
+    aiLabel: "개화 구역 감시 · 목업",
+    imageUrl: "/cameras/camera-2.png",
+  },
+  {
+    id: "cam-106",
+    name: "6동 · 허브 복도",
+    status: "degraded",
+    resolution: "1280×720",
+    aiLabel: "조도 저하 · 목업",
+    imageUrl: "/cameras/camera-3.png",
+  },
+  {
+    id: "cam-107",
+    name: "7동 · 시험재배 캐노피",
+    status: "online",
+    resolution: "1920×1080",
+    aiLabel: "DLI 샘플링 · 목업",
+    imageUrl: "/cameras/camera-1.png",
+  },
 ];
 
 export const MOCK_WEATHER: WeatherDay[] = [
@@ -237,18 +269,67 @@ export function getGreenhouseById(id: string): GreenhouseZone | undefined {
 }
 
 /** 온실 상세용 부가 센서 스냅샷(목업) */
-export const MOCK_GREENHOUSE_SENSOR_EXTRA: Record<
-  string,
-  { ecMScm: number; ph: number; co2ppm: number }
-> = {
-  "gh-01": { ecMScm: 1.2, ph: 6.0, co2ppm: 412 },
-  "gh-02": { ecMScm: 2.6, ph: 5.9, co2ppm: 445 },
-  "gh-03": { ecMScm: 1.4, ph: 5.8, co2ppm: 398 },
-  "gh-04": { ecMScm: 0.9, ph: 6.2, co2ppm: 520 },
-  "gh-05": { ecMScm: 1.8, ph: 6.1, co2ppm: 430 },
-  "gh-06": { ecMScm: 1.1, ph: 6.0, co2ppm: 405 },
-  "gh-07": { ecMScm: 2.1, ph: 5.7, co2ppm: 460 },
+export type GreenhouseSensorExtra = {
+  ecMScm: number;
+  ph: number;
+  /** 급수 탱크 잔량 % */
+  waterTankPct: number;
 };
+
+export const MOCK_GREENHOUSE_SENSOR_EXTRA: Record<string, GreenhouseSensorExtra> = {
+  "gh-01": { ecMScm: 1.2, ph: 6.0, waterTankPct: 78 },
+  "gh-02": { ecMScm: 2.6, ph: 5.9, waterTankPct: 62 },
+  "gh-03": { ecMScm: 1.4, ph: 5.8, waterTankPct: 71 },
+  "gh-04": { ecMScm: 0.9, ph: 6.2, waterTankPct: 91 },
+  "gh-05": { ecMScm: 1.8, ph: 6.1, waterTankPct: 44 },
+  "gh-06": { ecMScm: 1.1, ph: 6.0, waterTankPct: 83 },
+  "gh-07": { ecMScm: 2.1, ph: 5.7, waterTankPct: 55 },
+};
+
+/** 온실 상세 — 팬 초기 상태(목업) */
+export const MOCK_GREENHOUSE_FAN_ON: Record<string, boolean> = {
+  "gh-01": false,
+  "gh-02": true,
+  "gh-03": false,
+  "gh-04": true,
+  "gh-05": false,
+  "gh-06": true,
+  "gh-07": false,
+};
+
+export type GreenhouseTrendSeries = {
+  labels: string[];
+  tempC: number[];
+  humidityPct: number[];
+  soilPct: number[];
+};
+
+function buildGreenhouseTrendSeries(baseT: number, baseH: number, baseS: number): GreenhouseTrendSeries {
+  const n = 14;
+  const labels = Array.from({ length: n }, (_, i) => `${String(5 + i).padStart(2, "0")}:00`);
+  const tempC = Array.from({ length: n }, (_, i) => baseT + Math.sin(i * 0.55) * 2.1 + (i - n / 2) * 0.06);
+  const humidityPct = Array.from({ length: n }, (_, i) =>
+    Math.min(98, Math.max(35, baseH + Math.cos(i * 0.4) * 4 + (i % 3) * 0.8))
+  );
+  const soilPct = Array.from({ length: n }, (_, i) =>
+    Math.min(95, Math.max(22, baseS + Math.sin(i * 0.35) * 5 + i * 0.15))
+  );
+  return { labels, tempC, humidityPct, soilPct };
+}
+
+export const MOCK_GREENHOUSE_TRENDS: Record<string, GreenhouseTrendSeries> = Object.fromEntries(
+  MOCK_GREENHOUSES.map((z) => [z.id, buildGreenhouseTrendSeries(z.tempC, z.humidityPct, z.soilPct)])
+) as Record<string, GreenhouseTrendSeries>;
+
+/** 온실 상세 카메라 슬라이스(정적 목업 프레임 재사용) */
+export function getGreenhouseCameras(zone: GreenhouseZone): FarmCamera[] {
+  const short = zone.name.split("·")[0]?.trim() ?? zone.name;
+  return MOCK_CAMERAS.map((cam, i) => ({
+    ...cam,
+    id: `${zone.id}-cam-${i + 1}`,
+    name: `${short} · ${cam.name}`,
+  }));
+}
 
 /** 날씨 상세 — 3일 × 시간대(목업) */
 export const MOCK_WEATHER_HOURLY: WeatherDayHourly[] = [
@@ -340,6 +421,11 @@ export const MOCK_ALARMS: FarmAlarm[] = [
       "B상 순간 전류 변동 1.8초 — 발전기는 가동하지 않음(로그만 기록).",
   },
 ];
+
+/** 해당 온실명과 일치하는 가장 최근 알람(목업 목록 순서) */
+export function getLatestAlarmForGreenhouse(greenhouseName: string): FarmAlarm | undefined {
+  return MOCK_ALARMS.find((a) => a.greenhouseName === greenhouseName);
+}
 
 /** 대시보드 요약에 표시할 단일 알람 */
 export const MOCK_LATEST_ALARM: FarmAlarm = MOCK_ALARMS[0]!;

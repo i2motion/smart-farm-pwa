@@ -4,15 +4,13 @@ import type { FarmCamera } from "@/lib/dashboard/types";
 
 export function CamerasSummary({ cameras }: { cameras: FarmCamera[] }) {
   const total = cameras.length;
-  const online = cameras.filter((c) => c.status === "online").length;
   const degraded = cameras.filter((c) => c.status === "degraded").length;
   const offline = cameras.filter((c) => c.status === "offline").length;
 
   const items = [
     { label: "전체 채널", value: total },
-    { label: "온라인", value: online },
     { label: "성능 저하", value: degraded },
-    { label: "오프라인", value: offline },
+    { label: "미수신", value: offline },
   ];
 
   return (
@@ -31,7 +29,7 @@ export function CamerasSummary({ cameras }: { cameras: FarmCamera[] }) {
           </div>
         </div>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {items.map((item) => (
           <div
             key={item.label}
