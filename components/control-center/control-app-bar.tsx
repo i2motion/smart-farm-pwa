@@ -1,14 +1,13 @@
 "use client";
 
+import { LogIn, Phone } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { DashboardAlarmStatusStrip } from "@/components/dashboard/dashboard-alarm-status-strip";
 import { DashboardToolbar } from "@/components/dashboard-toolbar";
-import { MOCK_FARM_META, MOCK_GREENHOUSES, MOCK_LATEST_ALARM } from "@/lib/dashboard/mock-data";
-import type { GreenhouseZone } from "@/lib/dashboard/types";
-import { cn } from "@/lib/utils";
+import { MOCK_FARM_META, MOCK_LATEST_ALARM } from "@/lib/dashboard/mock-data";
 
 function formatTime(d: Date): string {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -26,35 +25,9 @@ function formatShortDate(d: Date): string {
   }).format(d);
 }
 
-function facilityLabel(zones: GreenhouseZone[]): string {
-  if (zones.some((z) => z.healthStatus === "error")) return "시설 점검 필요";
-  if (zones.some((z) => z.healthStatus === "warning")) return "시설 주의";
-  return "시설 정상";
-}
-
-function facilityFloatingClass(zones: GreenhouseZone[]): string {
-  if (zones.some((z) => z.healthStatus === "error")) {
-    return "border-rose-400/25 bg-rose-500/10 text-foreground";
-  }
-  if (zones.some((z) => z.healthStatus === "warning")) {
-    return "border-amber-400/25 bg-amber-500/10 text-foreground";
-  }
-  return "border-primary/25 bg-primary/[0.12] text-primary";
-}
-
-function FloatingFacilityBadge({ zones }: { zones: GreenhouseZone[] }) {
-  const label = facilityLabel(zones);
-  return (
-    <Link
-      href="/alarms"
-      className={cn(
-        "sf-animate-fade-up fixed bottom-28 left-1/2 z-30 flex min-h-9 max-w-[min(92vw,20rem)] -translate-x-1/2 items-center justify-center rounded-full border px-3.5 py-1.5 text-center text-[13px] font-semibold leading-tight tracking-tight shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-[transform,box-shadow,opacity] duration-300 hover:scale-[1.02] hover:shadow-[0_12px_40px_rgba(0,0,0,0.55)] active:scale-[0.99] touch-manipulation sm:bottom-24 md:bottom-10 md:left-auto md:right-8 md:min-h-0 md:translate-x-0 md:px-5 md:py-2.5 md:text-[14px] lg:py-2",
-        facilityFloatingClass(zones)
-      )}
-    >
-      {label}
-    </Link>
-  );
+function telHref(display: string): string {
+  const digits = display.replace(/\D/g, "");
+  return digits ? `tel:${digits}` : "tel:";
 }
 
 export function ControlAppBar() {
@@ -92,20 +65,40 @@ export function ControlAppBar() {
             >
               {MOCK_FARM_META.farmName}
             </Link>
-            <div className="flex items-baseline gap-1.5 md:flex-col md:items-start md:gap-0.5">
-              <time
-                className="text-[1.5rem] font-extralight tabular-nums leading-none tracking-tight text-foreground md:text-[2.125rem] lg:text-[1.85rem]"
-                dateTime={now.toISOString()}
-                suppressHydrationWarning
-              >
-                {timeStr}
-              </time>
-              <span
-                className="text-[11px] font-medium leading-tight text-muted-foreground md:text-[13px] md:tracking-wide"
-                suppressHydrationWarning
-              >
-                {dateStr}
-              </span>
+            <div className="flex min-w-0 w-full items-center justify-between gap-2 md:w-auto md:max-w-none md:items-start md:gap-3">
+              <div className="flex min-w-0 items-baseline gap-1.5 md:flex-col md:items-start md:gap-0.5">
+                <time
+                  className="text-[1.5rem] font-extralight tabular-nums leading-none tracking-tight text-foreground md:text-[2.125rem] lg:text-[1.85rem]"
+                  dateTime={now.toISOString()}
+                  suppressHydrationWarning
+                >
+                  {timeStr}
+                </time>
+                <span
+                  className="text-[11px] font-medium leading-tight text-muted-foreground md:text-[13px] md:tracking-wide"
+                  suppressHydrationWarning
+                >
+                  {dateStr}
+                </span>
+              </div>
+              <div className="flex shrink-0 items-center gap-0.5 md:gap-1">
+                <Link
+                  href="/login"
+                  className="inline-flex size-10 shrink-0 touch-manipulation items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground md:size-9"
+                  title="로그인"
+                  aria-label="로그인"
+                >
+                  <LogIn className="size-[17px] stroke-[1] md:size-[18px]" aria-hidden />
+                </Link>
+                <a
+                  href={telHref(MOCK_FARM_META.contactTel)}
+                  className="inline-flex size-10 shrink-0 touch-manipulation items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground md:size-9"
+                  title={`전화 · ${MOCK_FARM_META.contactTel}`}
+                  aria-label={`전화 걸기 · ${MOCK_FARM_META.contactTel}`}
+                >
+                  <Phone className="size-[17px] stroke-[1] md:size-[18px]" aria-hidden />
+                </a>
+              </div>
             </div>
           </div>
           <DashboardToolbar />
@@ -116,7 +109,6 @@ export function ControlAppBar() {
           </div>
         ) : null}
       </header>
-      <FloatingFacilityBadge zones={MOCK_GREENHOUSES} />
     </>
   );
 }

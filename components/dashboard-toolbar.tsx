@@ -1,20 +1,14 @@
 "use client";
 
-import { LogOut, UserRound } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { clearMockSession, readFarmSession } from "@/lib/auth/session-client";
+import { clearMockSession } from "@/lib/auth/session-client";
 import { cn } from "@/lib/utils";
 
 export function DashboardToolbar({ className }: { className?: string }) {
   const router = useRouter();
-  const [username, setUsername] = useState<string | null>(null);
-
-  useEffect(() => {
-    setUsername(readFarmSession()?.username ?? null);
-  }, []);
 
   function logout() {
     clearMockSession();
@@ -28,8 +22,6 @@ export function DashboardToolbar({ className }: { className?: string }) {
     router.refresh();
   }
 
-  const display = username ?? "운영자";
-
   return (
     <div className={cn("flex w-full items-center justify-end gap-1 md:w-auto md:gap-2 lg:gap-2", className)}>
       <span
@@ -41,18 +33,10 @@ export function DashboardToolbar({ className }: { className?: string }) {
       <Button
         type="button"
         variant="ghost"
-        size="icon-sm"
-        className="size-10 shrink-0 touch-manipulation rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground md:size-9"
-        title={display}
-        aria-label={`프로필 · ${display}`}
-      >
-        <UserRound className="size-[17px] stroke-[1] md:size-[18px]" aria-hidden />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
         size="sm"
-        className="hidden h-8 rounded-full px-3 text-[13px] font-semibold text-muted-foreground hover:bg-white/[0.06] hover:text-foreground sm:inline-flex md:h-9 md:px-3.5 md:text-[14px]"
+        className="inline-flex h-8 shrink-0 rounded-full px-3 text-[13px] font-semibold text-muted-foreground hover:bg-white/[0.06] hover:text-foreground md:h-9 md:px-3.5 md:text-[14px]"
+        title="계정 전환(로그아웃)"
+        aria-label="계정 전환"
         onClick={switchUser}
       >
         전환
@@ -61,7 +45,7 @@ export function DashboardToolbar({ className }: { className?: string }) {
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="size-10 shrink-0 touch-manipulation rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground md:size-9"
+        className="hidden size-10 shrink-0 touch-manipulation rounded-full text-muted-foreground hover:bg-white/[0.06] hover:text-foreground md:inline-flex md:size-9"
         title="로그아웃"
         aria-label="로그아웃"
         onClick={logout}

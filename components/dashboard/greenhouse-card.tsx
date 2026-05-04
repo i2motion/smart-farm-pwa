@@ -5,7 +5,7 @@ import { Waves, Warehouse } from "lucide-react";
 import Link from "next/link";
 
 import { sideWindowLayout, zoneNumber } from "@/lib/dashboard/greenhouse-vent-rules";
-import type { ControlMode, GreenhouseZone, HealthLevel } from "@/lib/dashboard/types";
+import type { ControlMode, GreenhouseZone } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
 
 function ModePill({ mode }: { mode: ControlMode }) {
@@ -18,28 +18,6 @@ function ModePill({ mode }: { mode: ControlMode }) {
       )}
     >
       {auto ? "자동" : "수동"}
-    </span>
-  );
-}
-
-function HealthCue({ status }: { status: HealthLevel }) {
-  const label = status === "normal" ? "양호" : status === "warning" ? "주의" : "위험";
-  const ring =
-    status === "normal"
-      ? "border-muted-foreground/35"
-      : status === "warning"
-        ? "border-amber-400/35"
-        : "border-rose-400/40";
-  return (
-    <span
-      className={cn(
-        "flex items-center gap-0.5 rounded-full border border-white/[0.08] px-1.5 py-px text-[10px] font-semibold text-muted-foreground md:gap-1.5 md:px-2.5 md:py-0.5 md:text-[12px] lg:px-2 lg:text-[11px]",
-        ring
-      )}
-      title={label}
-    >
-      <span className="size-1 rounded-full bg-muted-foreground/60" aria-hidden />
-      {label}
     </span>
   );
 }
@@ -114,10 +92,13 @@ export function GreenhouseCard({
         <ModePill mode={zone.mode} />
       </div>
 
-      <div className="mt-0.5 flex items-center justify-between gap-1 md:mt-2.5 md:gap-2">
-        <HealthCue status={zone.healthStatus} />
-        <p className="truncate text-[10px] font-medium tracking-tight text-muted-foreground md:text-[12px]">{zone.status}</p>
-      </div>
+      {zone.status.trim() ? (
+        <div className="mt-0.5 md:mt-2.5">
+          <p className="truncate text-[10px] font-medium tracking-tight text-muted-foreground md:text-[12px]">
+            {zone.status}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-1 flex items-end justify-between gap-2 md:mt-2.5 md:gap-4">
         <div className="leading-none">
@@ -138,8 +119,8 @@ export function GreenhouseCard({
       </div>
 
       <div className="mt-1 space-y-0.5 border-t border-white/[0.06] pt-1 md:mt-2.5 md:space-y-1.5 md:border-white/[0.08] md:pt-2.5">
-        <div>
-          <p className="text-muted-foreground mb-0 text-[10px] font-semibold uppercase tracking-[0.06em] md:mb-0.5 md:text-[12px]">
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          <p className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground md:text-[12px]">
             관수
           </p>
           <ActuatorChip active={zone.irrigationRunning} Icon={Waves} activeLabel="가동" idleLabel="정지" />
