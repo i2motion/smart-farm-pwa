@@ -1,27 +1,34 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Info,
-} from "lucide-react";
+import { AlertTriangle, ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { CameraStillFrame } from "@/components/cameras/camera-still-frame";
+import type { ControlButtonGroupKey } from "@/components/dashboard/control-button-group";
 import { ControlButtonGroup } from "@/components/dashboard/control-button-group";
-import { OperationSchedulePanel } from "@/components/greenhouse/operation-schedule-panel";
+import { OperationScheduleModal } from "@/components/greenhouse/operation-schedule-modal";
 import { SensorAlarmModal } from "@/components/greenhouse/sensor-alarm-modal";
 import { SensorSummary } from "@/components/greenhouse/sensor-summary";
 import { TrendChartPanel } from "@/components/greenhouse/trend-chart-panel";
 import { Button } from "@/components/ui/button";
-import { getGreenhouseCameras, getLatestAlarmForGreenhouse, MOCK_GREENHOUSE_FAN_ON } from "@/lib/dashboard/mock-data";
-import { getGreenhouseEdgeOnline, getSensorSnapshot } from "@/lib/greenhouse/mock-data";
+import { getGreenhouseCameras, getLatestAlarmForGreenhouse, MOCK_GREENHOUSE_FAN_ACTUATORS } from "@/lib/dashboard/mock-data";
+import { getSensorSnapshot } from "@/lib/greenhouse/mock-data";
 import type { AlarmSeverity, ControlMode, GreenhouseZone } from "@/lib/dashboard/types";
-import type { OperationSchedule, SensorAlarmRule, SensorKind } from "@/lib/greenhouse/types";
+import type { OperationKind, OperationSchedule, SensorAlarmRule, SensorKind } from "@/lib/greenhouse/types";
 import { cn } from "@/lib/utils";
+
+function keyToOperationKind(key: ControlButtonGroupKey): OperationKind {
+  const m: Record<ControlButtonGroupKey, OperationKind> = {
+    irrigation: "irrigation",
+    skylight: "skylight",
+    sideWindow: "sideWindow",
+    flowFan: "flowFan",
+    hotAirBlower: "hotAirBlower",
+    exhaustFan: "exhaustFan",
+  };
+  return m[key];
+}
 
 function ModePill({ mode }: { mode: ControlMode }) {
   const auto = mode === "AUTO";
@@ -33,23 +40,6 @@ function ModePill({ mode }: { mode: ControlMode }) {
       )}
     >
       {auto ? "AUTO" : "MANUAL"}
-    </span>
-  );
-}
-
-function EdgeStatusPill({ online }: { online: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tabular-nums md:px-3 md:py-1 md:text-[12px]",
-        online ? "border-emerald-400/25 bg-emerald-500/[0.1] text-emerald-100/95" : "border-white/[0.08] bg-white/[0.04] text-muted-foreground"
-      )}
-    >
-      <span
-        className={cn("size-1.5 shrink-0 rounded-full", online ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.45)]" : "bg-muted-foreground/50")}
-        aria-hidden
-      />
-      {online ? "온라인" : "오프라인"}
     </span>
   );
 }
@@ -97,29 +87,38 @@ export type GreenhouseDetailShellProps = {
 
 export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
   const snapshot = useMemo(() => getSensorSnapshot(zone), [zone]);
-  const edgeOnline = getGreenhouseEdgeOnline(zone.id);
-  const cameras = useMemo(() => getGreenhouseCameras(zone), [zone]);
-  const [camIndex, setCamIndex] = useState(0);
-  const cam = cameras[camIndex] ?? cameras[0]!;
-
-  const prevCam = useCallback(() => {
-    setCamIndex((i) => (i - 1 + cameras.length) % cameras.length);
-  }, [cameras.length]);
-
-  const nextCam = useCallback(() => {
-    setCamIndex((i) => (i + 1) % cameras.length);
-  }, [cameras.length]);
+  const cam = useMemo(() => getGreenhouseCameras(zone)[0]!, [zone]);
 
   const [mode, setMode] = useState<ControlMode>(zone.mode);
   const [irrigationOn, setIrrigationOn] = useState(zone.irrigationRunning);
   const [skylightOpen, setSkylightOpen] = useState(zone.skylightOpen);
   const [sideWindowOpen, setSideWindowOpen] = useState(zone.sideWindowOpen);
-  const [fanOn, setFanOn] = useState(MOCK_GREENHOUSE_FAN_ON[zone.id] ?? false);
+  const initialFans = MOCK_GREENHOUSE_FAN_ACTUATORS[zone.id] ?? { flowFan: false, hotAirBlower: false, exhaustFan: false };
+  const [flowFanOn, setFlowFanOn] = useState(initialFans.flowFan);
+  const [hotAirBlowerOn, setHotAirBlowerOn] = useState(initialFans.hotAirBlower);
+  const [exhaustFanOn, setExhaustFanOn] = useState(initialFans.exhaustFan);
 
   const [sensorAlarms, setSensorAlarms] = useState<SensorAlarmRule[]>([]);
   const [schedules, setSchedules] = useState<OperationSchedule[]>([]);
+  const [schedulePick, setSchedulePick] = useState<Partial<Record<ControlButtonGroupKey, string | null>>>({});
+  const [scheduleDialog, setScheduleDialog] = useState<{ kind: OperationKind; editId?: string } | null>(null);
   const [alarmOpen, setAlarmOpen] = useState(false);
   const [alarmSensor, setAlarmSensor] = useState<SensorKind | null>(null);
+
+  useEffect(() => {
+    setSchedulePick((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const k of Object.keys(next) as ControlButtonGroupKey[]) {
+        const id = next[k];
+        if (id && !schedules.some((s) => s.id === id)) {
+          delete next[k];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [schedules]);
 
   const zoneAlarm = getLatestAlarmForGreenhouse(zone.name);
 
@@ -127,11 +126,15 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
     irrigationOn,
     skylightOpen,
     sideWindowOpen,
-    fanOn,
+    flowFanOn,
+    hotAirBlowerOn,
+    exhaustFanOn,
     onIrrigationChange: setIrrigationOn,
     onSkylightChange: setSkylightOpen,
     onSideWindowChange: setSideWindowOpen,
-    onFanChange: setFanOn,
+    onFlowFanChange: setFlowFanOn,
+    onHotAirBlowerChange: setHotAirBlowerOn,
+    onExhaustFanChange: setExhaustFanOn,
   };
 
   return (
@@ -154,7 +157,6 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <ModePill mode={mode} />
-            <EdgeStatusPill online={edgeOnline} />
           </div>
         </div>
       </header>
@@ -175,39 +177,8 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
             </Link>
             <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/35 to-transparent" aria-hidden />
             <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-[2] px-3 pb-3 pt-10 md:px-5 md:pb-4 md:pt-14">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45 md:text-[11px]">
-                {camIndex + 1} / {cameras.length}
-              </p>
               <p className="mt-0.5 truncate text-[16px] font-semibold tracking-tight text-white/95 md:text-lg">{cam.name}</p>
             </div>
-          </div>
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 z-[3] flex -translate-y-1/2 justify-between px-2 md:px-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="icon-sm"
-              className="pointer-events-auto size-9 rounded-full border border-white/[0.12] bg-black/55 text-white shadow-lg backdrop-blur-md hover:bg-black/70 md:size-10"
-              aria-label="이전 카메라"
-              onClick={(e) => {
-                e.preventDefault();
-                prevCam();
-              }}
-            >
-              <ChevronLeft className="size-4 stroke-[1.5]" aria-hidden />
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="icon-sm"
-              className="pointer-events-auto size-9 rounded-full border border-white/[0.12] bg-black/55 text-white shadow-lg backdrop-blur-md hover:bg-black/70 md:size-10"
-              aria-label="다음 카메라"
-              onClick={(e) => {
-                e.preventDefault();
-                nextCam();
-              }}
-            >
-              <ChevronRight className="size-4 stroke-[1.5]" aria-hidden />
-            </Button>
           </div>
         </div>
         <p className="text-muted-foreground text-[11px] leading-relaxed md:text-[12px]">목업 정지 화면입니다. 미리보기를 누르면 카메라 목록으로 이동합니다.</p>
@@ -222,15 +193,27 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
       />
 
       <section aria-labelledby="gh-controls-heading" className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-md md:rounded-3xl md:p-5">
-        <h2 id="gh-controls-heading" className="sf-section-label mb-4">
+        <h2 id="gh-controls-heading" className="sf-section-label mb-3">
           구동 제어
         </h2>
-        <p className="text-muted-foreground mb-4 text-[11px] leading-relaxed md:text-[12px]">목업 토글 — 실제 PLC·MQTT 미연결</p>
-        <div className="mb-5 max-w-md">
+        <p className="text-muted-foreground mb-3 text-[11px] leading-relaxed md:text-[12px]">목업 토글 및 스케줄 — 실제 PLC·MQTT 미연결</p>
+        <div className="mb-4 max-w-md">
           <p className="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-[0.08em]">운전 모드</p>
           <ModeToggle mode={mode} onChange={setMode} />
         </div>
-        <ControlButtonGroup {...actuators} visible={["irrigation", "skylight", "sideWindow", "fan"]} className="max-w-xl" />
+        <ControlButtonGroup
+          {...actuators}
+          visible={["irrigation", "skylight", "sideWindow", "flowFan", "hotAirBlower", "exhaustFan"]}
+          className="max-w-xl"
+          schedule={{
+            schedules,
+            onSchedulesChange: setSchedules,
+            selectedScheduleIdByKey: schedulePick,
+            onSelectScheduleIdByKey: (key, id) => setSchedulePick((p) => ({ ...p, [key]: id })),
+            onOpenScheduleRegister: (key) => setScheduleDialog({ kind: keyToOperationKind(key) }),
+            onOpenScheduleEdit: (key, id) => setScheduleDialog({ kind: keyToOperationKind(key), editId: id }),
+          }}
+        />
       </section>
 
       <section aria-labelledby="gh-alarm-heading" className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-md md:rounded-3xl md:p-5">
@@ -274,7 +257,37 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
 
       <TrendChartPanel snapshot={snapshot} />
 
-      <OperationSchedulePanel greenhouseId={zone.id} schedules={schedules} onChange={setSchedules} />
+      <OperationScheduleModal
+        open={scheduleDialog != null}
+        kind={scheduleDialog?.kind ?? null}
+        initialEditId={scheduleDialog?.editId ?? null}
+        greenhouseId={zone.id}
+        schedules={schedules}
+        onClose={() => setScheduleDialog(null)}
+        onSaveRegister={(row) => {
+          setSchedules((prev) => [...prev, row]);
+          setScheduleDialog(null);
+          if (row.kind !== "sprayer") {
+            const k = row.kind as ControlButtonGroupKey;
+            setSchedulePick((p) => ({ ...p, [k]: row.id }));
+          }
+        }}
+        onSaveEdit={(row) => {
+          setSchedules((prev) => prev.map((s) => (s.id === row.id ? row : s)));
+          setScheduleDialog(null);
+        }}
+        onDelete={(id) => {
+          setSchedules((prev) => prev.filter((s) => s.id !== id));
+          setScheduleDialog(null);
+          setSchedulePick((p) => {
+            const next = { ...p };
+            for (const key of Object.keys(next) as ControlButtonGroupKey[]) {
+              if (next[key] === id) delete next[key];
+            }
+            return next;
+          });
+        }}
+      />
 
       <SensorAlarmModal
         open={alarmOpen}

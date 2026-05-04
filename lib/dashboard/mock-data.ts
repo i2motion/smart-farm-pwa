@@ -286,8 +286,10 @@ export const MOCK_GREENHOUSE_SENSOR_EXTRA: Record<string, GreenhouseSensorExtra>
   "gh-07": { ecMScm: 2.1, ph: 5.7, waterTankPct: 55 },
 };
 
-/** 온실 상세 — 팬 초기 상태(목업) */
-export const MOCK_GREENHOUSE_FAN_ON: Record<string, boolean> = {
+/** 온실 상세 — 유동팬·온풍기·배기팬 초기 상태(목업) */
+export type GreenhouseFanActuators = { flowFan: boolean; hotAirBlower: boolean; exhaustFan: boolean };
+
+const LEGACY_FAN_ON: Record<string, boolean> = {
   "gh-01": false,
   "gh-02": true,
   "gh-03": false,
@@ -296,6 +298,10 @@ export const MOCK_GREENHOUSE_FAN_ON: Record<string, boolean> = {
   "gh-06": true,
   "gh-07": false,
 };
+
+export const MOCK_GREENHOUSE_FAN_ACTUATORS: Record<string, GreenhouseFanActuators> = Object.fromEntries(
+  Object.entries(LEGACY_FAN_ON).map(([id, flowFan]) => [id, { flowFan, hotAirBlower: false, exhaustFan: false }])
+) as Record<string, GreenhouseFanActuators>;
 
 export type GreenhouseTrendSeries = {
   labels: string[];
@@ -321,14 +327,22 @@ export const MOCK_GREENHOUSE_TRENDS: Record<string, GreenhouseTrendSeries> = Obj
   MOCK_GREENHOUSES.map((z) => [z.id, buildGreenhouseTrendSeries(z.tempC, z.humidityPct, z.soilPct)])
 ) as Record<string, GreenhouseTrendSeries>;
 
-/** 온실 상세 카메라 슬라이스(정적 목업 프레임 재사용) */
+/** 온실 상세 카메라 — 제1~7동은 동당 대표 카메라 1대만(목업) */
 export function getGreenhouseCameras(zone: GreenhouseZone): FarmCamera[] {
   const short = zone.name.split("·")[0]?.trim() ?? zone.name;
-  return MOCK_CAMERAS.map((cam, i) => ({
-    ...cam,
-    id: `${zone.id}-cam-${i + 1}`,
-    name: `${short} · ${cam.name}`,
-  }));
+  const n = parseInt(zone.id.replace(/\D/g, ""), 10) || 1;
+  const templateIndex = Math.min(Math.max(n - 1, 0), MOCK_CAMERAS.length - 1);
+  const template = MOCK_CAMERAS[templateIndex]!;
+  const labelTail = template.name.includes("·")
+    ? template.name.split("·").slice(1).join("·").trim()
+    : "내부 감시";
+  return [
+    {
+      ...template,
+      id: `${zone.id}-cam-1`,
+      name: `${short} · ${labelTail}`,
+    },
+  ];
 }
 
 /** 날씨 상세 — 3일 × 시간대(목업) */

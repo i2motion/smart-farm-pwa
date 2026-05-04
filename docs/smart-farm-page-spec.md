@@ -353,7 +353,7 @@
 | 역할 | 파일 예시 |
 |------|-----------|
 | 대시보드 뷰 | `components/dashboard/dashboard-shell.tsx`, `farm-overview.tsx`, `greenhouse-grid.tsx`, `environment-section.tsx`, `environment-compare.tsx`, `latest-alarm.tsx` |
-| 온실 상세·구동 스케줄(목업) | `app/(control)/greenhouses/[id]/page.tsx`, `components/greenhouse/greenhouse-detail-shell.tsx`, `operation-schedule-panel.tsx`, `lib/greenhouse/types.ts` |
+| 온실 상세·구동 스케줄(목업) | `app/(control)/greenhouses/[id]/page.tsx`, `components/greenhouse/greenhouse-detail-shell.tsx`, `components/dashboard/control-button-group.tsx`, `operation-schedule-modal.tsx`, `lib/greenhouse/types.ts` |
 | 카메라 페이지 | `app/(control)/cameras/page.tsx` |
 | 자동/수동 | `app/(control)/auto-manual/page.tsx`, `components/auto-manual/auto-manual-panel.tsx` |
 | 센서 | `app/(control)/sensors/page.tsx` |

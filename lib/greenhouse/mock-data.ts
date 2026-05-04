@@ -1,7 +1,7 @@
 import { MOCK_GREENHOUSE_SENSOR_EXTRA, MOCK_GREENHOUSES } from "@/lib/dashboard/mock-data";
 import type { GreenhouseZone } from "@/lib/dashboard/types";
 
-import type { GreenhouseSensorSnapshot, SensorKind, TrendRange } from "./types";
+import type { GreenhouseSensorSnapshot, OperationKind, SensorKind, TrendMetricKind, TrendRange } from "./types";
 
 /** 게이트웨이 온라인 여부(목업) */
 export const MOCK_GREENHOUSE_EDGE_ONLINE: Record<string, boolean> = {
@@ -34,6 +34,7 @@ export function getSensorSnapshot(zone: GreenhouseZone): GreenhouseSensorSnapsho
     soilTempC: zone.tempC - 1.2 - (n % 3) * 0.3,
     ecMScm: extra.ecMScm,
     ph: extra.ph,
+    solarWm2: Math.max(0, 320 + (n % 7) * 42 + Math.cos(n * 0.4) * 55),
   };
 }
 
@@ -50,6 +51,36 @@ const SENSOR_LABEL: Record<SensorKind, string> = {
 
 export function sensorKindLabel(kind: SensorKind): string {
   return SENSOR_LABEL[kind];
+}
+
+const OPERATION_KIND_LABEL: Record<OperationKind, string> = {
+  irrigation: "관수",
+  skylight: "천창",
+  sideWindow: "측면창",
+  flowFan: "유동팬",
+  hotAirBlower: "온풍기",
+  sprayer: "분무기",
+  exhaustFan: "배기팬",
+};
+
+export function operationKindLabel(kind: OperationKind): string {
+  return OPERATION_KIND_LABEL[kind];
+}
+
+const TREND_METRIC_LABEL: Record<TrendMetricKind, string> = {
+  temp: "온도",
+  humidity: "습도",
+  soilMoisture: "토양 수분",
+  soilTemp: "토양 온도",
+  ec: "EC",
+  ph: "pH",
+  solar: "일사량",
+};
+
+export const TREND_METRIC_ORDER: TrendMetricKind[] = ["temp", "humidity", "soilMoisture", "soilTemp", "ec", "ph", "solar"];
+
+export function trendMetricLabel(kind: TrendMetricKind): string {
+  return TREND_METRIC_LABEL[kind];
 }
 
 function trendPointCount(range: TrendRange): number {
@@ -81,6 +112,11 @@ function baseValueForSensor(snapshot: GreenhouseSensorSnapshot, sensor: SensorKi
   }
 }
 
+export function baseValueForTrendMetric(snapshot: GreenhouseSensorSnapshot, metric: TrendMetricKind): number {
+  if (metric === "solar") return snapshot.solarWm2;
+  return baseValueForSensor(snapshot, metric);
+}
+
 export function unitForSensor(sensor: SensorKind): string {
   switch (sensor) {
     case "temp":
@@ -102,25 +138,28 @@ export function unitForSensor(sensor: SensorKind): string {
   }
 }
 
+export function unitForTrendMetric(metric: TrendMetricKind): string {
+  if (metric === "solar") return "W/m²";
+  return unitForSensor(metric);
+}
+
 export function getTrendSeries(
   snapshot: GreenhouseSensorSnapshot,
   range: TrendRange,
-  sensor: SensorKind
+  metric: TrendMetricKind
 ): { labels: string[]; values: number[] } {
   const n = trendPointCount(range);
-  const base = baseValueForSensor(snapshot, sensor);
+  const base = baseValueForTrendMetric(snapshot, metric);
   const amp =
-    sensor === "temp" || sensor === "soilTemp"
+    metric === "temp" || metric === "soilTemp"
       ? 1.8
-      : sensor === "humidity" || sensor === "soilMoisture"
+      : metric === "humidity" || metric === "soilMoisture"
         ? 5
-        : sensor === "rain"
-          ? 0.8
-          : sensor === "wind"
-            ? 0.6
-            : sensor === "ec"
-              ? 0.25
-              : 0.15;
+        : metric === "ec"
+          ? 0.25
+          : metric === "solar"
+            ? 45
+            : 0.15;
   const labels: string[] = [];
   const values: number[] = [];
   for (let i = 0; i < n; i++) {
