@@ -1,12 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -15,36 +10,30 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Smart Farm",
-    template: "%s · Smart Farm",
+    default: "사계리 농장",
+    template: "%s · 사계리 농장",
   },
   description:
-    "Monitor sensors, irrigation, and climate for your farm — optimized as a Progressive Web App.",
-  applicationName: "Smart Farm",
+    "사계리 농장 — 센서·관수·환경을 모바일 우선 PWA로 모니터링합니다.",
+  applicationName: "사계리 농장",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "Smart Farm",
+    statusBarStyle: "black-translucent",
+    title: "사계리 농장",
   },
   formatDetection: {
     telephone: false,
   },
-  icons: {
-    icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
-  },
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4faf6" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a2e24" },
-  ],
+  themeColor: "#1a2230",
   width: "device-width",
   initialScale: 1,
 };
 
-const themeInitScript = `(function(){try{var k='smart-farm-theme';var s=localStorage.getItem(k);var d=s?s==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+/** Dark-only UI — keep class in sync before paint (no light theme). */
+const themeInitScript = `(function(){try{document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -52,10 +41,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh antialiased`}
-      >
+    <html lang="ko" className="dark" suppressHydrationWarning>
+      <body className={`${geistMono.variable} min-h-dvh bg-background font-sans antialiased`}>
         <Script
           id="smart-farm-theme-init"
           strategy="beforeInteractive"

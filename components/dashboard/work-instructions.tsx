@@ -17,16 +17,16 @@ function StatusBadge({ status }: { status: WorkInstructionStatus }) {
     { label: string; className: string }
   > = {
     pending: {
-      label: "Pending",
+      label: "대기",
       className:
         "border-border/70 bg-muted/40 text-muted-foreground",
     },
     "in-progress": {
-      label: "In progress",
+      label: "진행",
       className: "border-primary/25 bg-primary/8 text-primary",
     },
     done: {
-      label: "Done",
+      label: "완료",
       className:
         "border-emerald-600/25 bg-emerald-600/[0.08] text-emerald-900 dark:text-emerald-100",
     },
@@ -51,9 +51,9 @@ export function WorkInstructions({
   return (
     <Card className={cn("rounded-2xl border-border/60 shadow-sm", className)}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold tracking-tight">Work instructions</CardTitle>
+        <CardTitle className="text-sm font-semibold tracking-tight">작업 지시</CardTitle>
         <CardDescription className="text-xs">
-          Ops queue · {items.length} tasks (mock)
+          운영 큐 · {items.length}건(목업)
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
@@ -80,7 +80,7 @@ export function WorkInstructions({
                 {task.instruction}
               </p>
               <div className="text-muted-foreground mt-2 flex items-center justify-between border-t border-border/40 pt-2 font-mono text-[11px] tabular-nums">
-                <span>Due</span>
+                <span>마감</span>
                 <span>{task.dueDate}</span>
               </div>
             </div>

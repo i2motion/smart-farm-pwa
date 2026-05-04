@@ -11,12 +11,16 @@ export type FarmSession = {
   loggedInAt: string;
 };
 
+function cookieSecureSuffix(): string {
+  return typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
+}
+
 export function setAuthCookie() {
-  document.cookie = `${AUTH_COOKIE_NAME}=1; path=/; max-age=${MOCK_SESSION_MAX_AGE_SEC}; SameSite=Lax`;
+  document.cookie = `${AUTH_COOKIE_NAME}=1; path=/; max-age=${MOCK_SESSION_MAX_AGE_SEC}; SameSite=Lax${cookieSecureSuffix()}`;
 }
 
 export function clearAuthCookie() {
-  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax${cookieSecureSuffix()}`;
 }
 
 export function persistMockSession(username: string) {

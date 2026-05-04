@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Info } from "lucide-react";
+import { Info, TriangleAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,7 +17,7 @@ function SeverityBadge({ severity }: { severity: AlarmSeverity }) {
   if (severity === "error") {
     return (
       <Badge variant="destructive" className="rounded-md px-1.5 py-0 text-[10px] font-medium">
-        Error
+        오류
       </Badge>
     );
   }
@@ -27,8 +27,8 @@ function SeverityBadge({ severity }: { severity: AlarmSeverity }) {
         variant="outline"
         className="rounded-md border-amber-500/35 bg-amber-500/[0.08] px-1.5 py-0 text-[10px] font-medium text-amber-950 dark:text-amber-100"
       >
-        <AlertTriangle className="mr-0.5 size-3 opacity-80" aria-hidden />
-        Warn
+        <TriangleAlert className="mr-0.5 size-3 opacity-80" aria-hidden />
+        경고
       </Badge>
     );
   }
@@ -38,7 +38,7 @@ function SeverityBadge({ severity }: { severity: AlarmSeverity }) {
       className="rounded-md border-sky-500/30 bg-sky-500/[0.06] px-1.5 py-0 text-[10px] font-medium text-sky-950 dark:text-sky-100"
     >
       <Info className="mr-0.5 size-3 opacity-80" aria-hidden />
-      Info
+      정보
     </Badge>
   );
 }
@@ -56,9 +56,9 @@ export function RecentAlarms({
   return (
     <Card className={cn("rounded-2xl border-border/60 shadow-sm", className)}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold tracking-tight">Recent alarms</CardTitle>
+        <CardTitle className="text-sm font-semibold tracking-tight">최근 알람</CardTitle>
         <CardDescription className="text-xs">
-          Latest {alarms.length} · mock bridge
+          최근 {alarms.length}건 · 목업 연동
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">

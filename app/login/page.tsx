@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
 
 import { LoginForm } from "@/components/login-form";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { firstQueryValue, resolveSearchParamsRecord } from "@/lib/next/resolve-page-args";
 
 export const metadata: Metadata = {
-  title: "Login",
+  title: "로그인",
 };
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { next } = await searchParams;
+  const sp = await resolveSearchParamsRecord(searchParams);
+  const next = firstQueryValue(sp.next);
 
   return (
     <div className="sf-login-shell relative flex min-h-dvh flex-col">
-      <header className="absolute inset-x-0 top-0 z-10 flex justify-end p-4">
-        <ThemeToggle />
-      </header>
-      <main className="flex flex-1 flex-col justify-center px-4 pb-16 pt-14 sm:px-6">
+      <main className="flex flex-1 flex-col justify-center px-5 pb-20 pt-12 sm:px-8">
         <LoginForm initialNext={next} />
       </main>
     </div>
