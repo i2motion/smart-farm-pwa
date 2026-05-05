@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { GreenhouseCropsSection } from "@/components/settings/greenhouse-crops-section";
 import { MOCK_FARM_META } from "@/lib/dashboard/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -15,15 +16,6 @@ const SECTIONS = [
     fields: [
       { key: "farmName", label: "농장명", placeholder: MOCK_FARM_META.farmName, type: "text" as const },
       { key: "tel", label: "대표 연락처", placeholder: MOCK_FARM_META.contactTel, type: "text" as const },
-    ],
-  },
-  {
-    id: "plc",
-    title: "PLC / 현장망",
-    description: "게이트웨이·노드 연결(향후)",
-    fields: [
-      { key: "plcHost", label: "PLC 브로커 호스트", placeholder: "192.168.0.10", type: "text" as const },
-      { key: "plcPort", label: "포트", placeholder: "4840", type: "text" as const },
     ],
   },
   {
@@ -72,6 +64,7 @@ export function SettingsPageShell() {
       </div>
 
       <div className="space-y-4">
+        <GreenhouseCropsSection />
         {SECTIONS.map((sec) => (
           <section
             key={sec.id}

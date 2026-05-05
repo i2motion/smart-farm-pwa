@@ -46,6 +46,12 @@ export type FarmApiErrorPayload = {
 
 // --- Farm ---
 
+export type FarmGreenhouseBriefDto = {
+  id: string;
+  name: string;
+  cropName: string;
+};
+
 export type FarmStatusDto = {
   farmId: string;
   name: string;
@@ -53,6 +59,8 @@ export type FarmStatusDto = {
   updatedAt: string;
   overallHealth: "normal" | "warning" | "error";
   activeGreenhouseCount: number;
+  /** 온실 id·표시명·작목 — Delphi 모의 서버가 내려주면 설정·요약 동기화에 사용 */
+  greenhouses?: FarmGreenhouseBriefDto[];
 };
 
 export type SystemStatusDto = {
@@ -66,6 +74,8 @@ export type SystemStatusDto = {
 export type GreenhouseSummaryDto = {
   id: string;
   name: string;
+  cropName?: string;
+  /** 호환·미구현 서버 폴백 — 신규 API는 `cropName` 우선 */
   crop: string;
   health: "normal" | "warning" | "error";
   mode: "AUTO" | "MANUAL";
@@ -78,14 +88,42 @@ export type GreenhouseStatusDto = {
   name: string;
   mode: "AUTO" | "MANUAL";
   health: "normal" | "warning" | "error";
+  cropName?: string;
+  crop: string;
   /** 집계된 최신 센서 스냅샷 — 서버 스키마에 맞게 확장 */
   snapshot: Record<string, number | string | boolean | null>;
 };
 
 export type GreenhouseDetailDto = GreenhouseStatusDto & {
-  crop: string;
   /** 확장 필드 — 트렌드·스케줄 요약 등 */
   meta?: Record<string, unknown>;
+};
+
+/** `PATCH /v1/greenhouses/{id}` — 둘 다 생략하면 400; 빈 문자열 불가(Delphi 모의 서버 규약) */
+export type GreenhouseProfilePatchDto = {
+  name?: string;
+  cropName?: string;
+};
+
+/** 부지 기상탑 등 야외 기후 관측 — 대시보드 `ClimateSensor`와 매핑 */
+export type ClimateStationDto = {
+  id: string;
+  name: string;
+  location: string;
+  tempC: number;
+  humidityPct: number;
+  dewpointC: number;
+  batteryPct: number;
+  windMs: number;
+  windDirLabel: string;
+  solarRadiationWm2: number;
+  /** 누적/구간 강우량(mm) — 서버 제공 단위 정의에 따름 */
+  rainfallMm?: number;
+  measuredAt?: string | null;
+};
+
+export type ClimateSensorsResponseDto = {
+  station: ClimateStationDto;
 };
 
 // --- Sensors ---

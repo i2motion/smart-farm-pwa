@@ -5,8 +5,9 @@
  * - Farm PC가 급수 PLC, 영양액 PLC, 기후·온실 센서, 추후 카메라 등과 중계합니다.
  *
  * 환경 변수:
- * - NEXT_PUBLIC_FARM_API_BASE_URL — 미설정 시 http://localhost:8080
- * - NEXT_PUBLIC_FARM_API_FORCE_MOCK=1 — 네트워크 호출 생략(개발용). 실패 시 목업 폴백과 별개.
+ * - NEXT_PUBLIC_FARM_API_BASE_URL — 미설정 시 http://localhost:8080 (`.env.development` 권장)
+ * - NEXT_PUBLIC_FARM_API_FORCE_MOCK=1 — 네트워크 호출 생략(개발용).
+ * - NEXT_PUBLIC_FARM_API_FALLBACK_MOCK=1 — 대시보드 등에서 API 실패 시 로컬 목업으로 표시 (`farm-env.ts`).
  *
  * 향후 UI 연동 위치(예시):
  * - 대시보드 로드: `getFarmStatus`, `getGreenhouses`, `checkFarmApiConnection`

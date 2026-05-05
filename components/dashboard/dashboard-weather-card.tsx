@@ -132,6 +132,10 @@ function WeatherCompactMobile({
             <p className="text-[9px] text-muted-foreground">일사</p>
             <p className="text-[12px] font-semibold tabular-nums text-foreground">{sensor.solarRadiationWm2}</p>
           </div>
+          <div className="rounded-md bg-white/[0.03] px-1.5 py-1 ring-1 ring-white/[0.04]">
+            <p className="text-[9px] text-muted-foreground">강우</p>
+            <p className="text-[12px] font-semibold tabular-nums text-foreground">{sensor.rainfallMm.toFixed(1)}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -223,9 +227,13 @@ export function DashboardWeatherCard({
             <p className="text-muted-foreground text-[11px] font-medium md:text-[12px]">풍향</p>
             <p className="mt-0 text-[15px] font-semibold text-foreground md:mt-0.5 md:text-[16px]">{sensor.windDirLabel}</p>
           </div>
-          <div className="col-span-2 sm:col-span-1">
+          <div>
             <p className="text-muted-foreground text-[11px] font-medium md:text-[12px]">일사</p>
             <p className="mt-0 text-[15px] font-semibold text-foreground md:mt-0.5 md:text-[16px]">{sensor.solarRadiationWm2} W/m²</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-[11px] font-medium md:text-[12px]">강우</p>
+            <p className="mt-0 text-[15px] font-semibold text-foreground md:mt-0.5 md:text-[16px]">{sensor.rainfallMm.toFixed(1)} mm</p>
           </div>
         </div>
       </div>

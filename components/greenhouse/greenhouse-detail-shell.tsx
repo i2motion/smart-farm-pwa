@@ -12,8 +12,15 @@ import { SensorAlarmModal } from "@/components/greenhouse/sensor-alarm-modal";
 import { SensorSummary } from "@/components/greenhouse/sensor-summary";
 import { TrendChartPanel } from "@/components/greenhouse/trend-chart-panel";
 import { Button } from "@/components/ui/button";
-import { getGreenhouseCameras, getLatestAlarmForGreenhouse, MOCK_GREENHOUSE_FAN_ACTUATORS } from "@/lib/dashboard/mock-data";
+import { getClimateSensors } from "@/lib/api/climate-api";
+import { shouldUseFarmHttp } from "@/lib/api/farm-env";
+import { getGreenhouseDetail } from "@/lib/api/greenhouse-api";
+import { getGreenhouseSensors } from "@/lib/api/sensor-api";
+import type { GreenhouseDetailDto } from "@/lib/api/types";
+import { climateStationDtoToSensor } from "@/lib/dashboard/climate-from-api";
+import { getGreenhouseCameras, getLatestAlarmForGreenhouse, MOCK_CLIMATE_SENSORS, MOCK_GREENHOUSE_FAN_ACTUATORS } from "@/lib/dashboard/mock-data";
 import { getSensorSnapshot } from "@/lib/greenhouse/mock-data";
+import { mergeSensorReadingsIntoSnapshot } from "@/lib/greenhouse/merge-api-sensors-into-snapshot";
 import type { AlarmSeverity, ControlMode, GreenhouseZone } from "@/lib/dashboard/types";
 import type { OperationKind, OperationSchedule, SensorAlarmRule, SensorKind } from "@/lib/greenhouse/types";
 import { cn } from "@/lib/utils";
@@ -88,9 +95,86 @@ export type GreenhouseDetailShellProps = {
   zone: GreenhouseZone;
 };
 
+const GH_DETAIL_SENSOR_POLL_MS = 4_000;
+const GH_DETAIL_META_POLL_MS = 4_000;
+
+function cropFromGreenhouseDto(d: Pick<GreenhouseDetailDto, "cropName" | "crop">): string {
+  const n = d.cropName?.trim();
+  if (n) return n;
+  return d.crop;
+}
+
 export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
-  const snapshot = useMemo(() => getSensorSnapshot(zone), [zone]);
+  const baseSnapshot = useMemo(() => getSensorSnapshot(zone), [zone]);
+  const [snapshot, setSnapshot] = useState(baseSnapshot);
   const cam = useMemo(() => getGreenhouseCameras(zone)[0]!, [zone]);
+  const [ghMeta, setGhMeta] = useState<{ name: string; crop: string } | null>(null);
+
+  useEffect(() => {
+    setSnapshot(baseSnapshot);
+  }, [baseSnapshot]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function poll() {
+      if (!shouldUseFarmHttp()) {
+        if (!cancelled) setSnapshot(baseSnapshot);
+        return;
+      }
+      const [sensorRes, climateRes] = await Promise.all([getGreenhouseSensors(zone.id), getClimateSensors()]);
+      if (cancelled) return;
+      let next = baseSnapshot;
+      if (sensorRes.ok) {
+        next = mergeSensorReadingsIntoSnapshot(next, sensorRes.data);
+      }
+      if (climateRes.ok) {
+        const fallback = MOCK_CLIMATE_SENSORS[0]!;
+        const climate = climateStationDtoToSensor(climateRes.data.station, fallback);
+        next = { ...next, rainMm: climate.rainfallMm };
+      }
+      if (sensorRes.ok || climateRes.ok) {
+        setSnapshot(next);
+      } else {
+        setSnapshot(baseSnapshot);
+      }
+    }
+
+    void poll();
+    const id = setInterval(() => void poll(), GH_DETAIL_SENSOR_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [zone.id, baseSnapshot]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function pollMeta() {
+      if (!shouldUseFarmHttp()) {
+        setGhMeta(null);
+        return;
+      }
+      const res = await getGreenhouseDetail(zone.id);
+      if (cancelled) return;
+      if (!res.ok) {
+        setGhMeta(null);
+        return;
+      }
+      const d = res.data;
+      setGhMeta({ name: d.name, crop: cropFromGreenhouseDto(d) });
+    }
+
+    void pollMeta();
+    const id = setInterval(() => void pollMeta(), GH_DETAIL_META_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [zone.id]);
+
+  const headline = ghMeta ?? { name: zone.name, crop: zone.crop };
 
   const [mode, setMode] = useState<ControlMode>(zone.mode);
   const [irrigationOn, setIrrigationOn] = useState(zone.irrigationRunning);
@@ -128,7 +212,7 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
     });
   }, [schedules]);
 
-  const zoneAlarm = getLatestAlarmForGreenhouse(zone.name);
+  const zoneAlarm = getLatestAlarmForGreenhouse(headline.name);
 
   const actuators = {
     irrigationOn,
@@ -181,8 +265,8 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
       <header className="space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-1">
-            <h1 className="text-[1.65rem] font-semibold leading-tight tracking-tight text-foreground md:text-3xl">{zone.name}</h1>
-            <p className="text-[15px] leading-snug text-muted-foreground md:text-[16px]">{zone.crop}</p>
+            <h1 className="text-[1.65rem] font-semibold leading-tight tracking-tight text-foreground md:text-3xl">{headline.name}</h1>
+            <p className="text-[15px] leading-snug text-muted-foreground md:text-[16px]">{headline.crop}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <ModePill mode={mode} />

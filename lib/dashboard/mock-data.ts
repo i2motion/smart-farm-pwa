@@ -133,14 +133,15 @@ export const MOCK_CLIMATE_SENSORS: ClimateSensor[] = [
     windMs: 4.2,
     windDirLabel: "북북서",
     solarRadiationWm2: 612,
+    rainfallMm: 0,
   },
 ];
 
 export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   {
     id: "gh-01",
-    name: "제1동 · 관리동",
-    crop: "비타민 채소 · 6주차",
+    name: "제1동",
+    crop: "쪽파",
     tempC: 21.8,
     humidityPct: 68,
     soilPct: 54,
@@ -159,8 +160,8 @@ export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   },
   {
     id: "gh-02",
-    name: "제2동 · 토마토",
-    crop: "방울토마토 · 11주차",
+    name: "제2동",
+    crop: "쪽파",
     tempC: 25.2,
     humidityPct: 58,
     soilPct: 71,
@@ -179,8 +180,8 @@ export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   },
   {
     id: "gh-03",
-    name: "제3동 · 딸기",
-    crop: "일장형 · 개화기",
+    name: "제3동",
+    crop: "쪽파",
     tempC: 19.6,
     humidityPct: 76,
     soilPct: 62,
@@ -199,8 +200,8 @@ export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   },
   {
     id: "gh-04",
-    name: "제4동 · 육묘",
-    crop: "묘목 · 미스트",
+    name: "제4동",
+    crop: "콜라비",
     tempC: 23.4,
     humidityPct: 82,
     soilPct: 88,
@@ -219,8 +220,8 @@ export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   },
   {
     id: "gh-05",
-    name: "제5동 · 생야채(NFT)",
-    crop: "버터헤드 · 5주차",
+    name: "제5동",
+    crop: "망고",
     tempC: 20.1,
     humidityPct: 72,
     soilPct: 49,
@@ -239,8 +240,8 @@ export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   },
   {
     id: "gh-06",
-    name: "제6동 · 허브",
-    crop: "바질·고수 · 수확기",
+    name: "제6동",
+    crop: "감귤",
     tempC: 22.0,
     humidityPct: 64,
     soilPct: 66,
@@ -259,8 +260,8 @@ export const MOCK_GREENHOUSES: GreenhouseZone[] = [
   },
   {
     id: "gh-07",
-    name: "제7동 · 시험재배",
-    crop: "시험 · DLI 맵",
+    name: "제7동",
+    crop: "감귤",
     tempC: 24.0,
     humidityPct: 59,
     soilPct: 55,
@@ -425,7 +426,7 @@ export const MOCK_ALARMS: FarmAlarm[] = [
   {
     id: "a1",
     time: "14:32",
-    greenhouseName: "제5동 · 생야채(NFT)",
+    greenhouseName: "제5동",
     alarmType: "관수",
     severity: "warning",
     message:
@@ -434,7 +435,7 @@ export const MOCK_ALARMS: FarmAlarm[] = [
   {
     id: "a2",
     time: "13:58",
-    greenhouseName: "제2동 · 토마토",
+    greenhouseName: "제2동",
     alarmType: "센서 드리프트",
     severity: "info",
     message:
@@ -443,7 +444,7 @@ export const MOCK_ALARMS: FarmAlarm[] = [
   {
     id: "a3",
     time: "11:06",
-    greenhouseName: "제7동 · 시험재배",
+    greenhouseName: "제7동",
     alarmType: "임계값",
     severity: "error",
     message:
@@ -452,7 +453,7 @@ export const MOCK_ALARMS: FarmAlarm[] = [
   {
     id: "a4",
     time: "09:41",
-    greenhouseName: "제3동 · 딸기",
+    greenhouseName: "제3동",
     alarmType: "환기",
     severity: "warning",
     message:
@@ -473,7 +474,7 @@ export const MOCK_ALARM_RULES: AlarmRule[] = [
   {
     id: "rule-1",
     name: "캐노피 고온",
-    scopeLabel: "제7동 · 시험재배",
+    scopeLabel: "제7동",
     sensorLabel: "실내 온도",
     conditionSummary: "≥ 27.5°C 지속 5분",
     enabled: true,
@@ -481,7 +482,7 @@ export const MOCK_ALARM_RULES: AlarmRule[] = [
   {
     id: "rule-2",
     name: "급수 유량 편차",
-    scopeLabel: "제5동 · 생야채(NFT)",
+    scopeLabel: "제5동",
     sensorLabel: "유량 적산",
     conditionSummary: "목표 대비 15% 이상 저하 10분",
     enabled: true,
@@ -508,7 +509,7 @@ export const MOCK_WORK_INSTRUCTIONS: WorkInstruction[] = [
   {
     id: "w1",
     dueDate: "2026-05-04",
-    greenhouseName: "제5동 · 생야채(NFT)",
+    greenhouseName: "제5동",
     taskType: "관수 점검",
     instruction:
       "여과 압력 확인, C–D열 드리퍼 점검, 플러시 후 EC 확인.",
@@ -517,7 +518,7 @@ export const MOCK_WORK_INSTRUCTIONS: WorkInstruction[] = [
   {
     id: "w2",
     dueDate: "2026-05-04",
-    greenhouseName: "제2동 · 토마토",
+    greenhouseName: "제2동",
     taskType: "양액 스케줄",
     instruction:
       "원액 탱크 B 주입량 확인, 2채널 pH 목표 5.8–6.2 기록.",
@@ -526,7 +527,7 @@ export const MOCK_WORK_INSTRUCTIONS: WorkInstruction[] = [
   {
     id: "w3",
     dueDate: "2026-05-05",
-    greenhouseName: "제3동 · 딸기",
+    greenhouseName: "제3동",
     taskType: "환기 점검",
     instruction:
       "마루 개폐기 동작 시간과 BMS 스케줄 비교, L1–L3 이동 시간 기록.",

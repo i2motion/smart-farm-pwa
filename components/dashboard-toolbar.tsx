@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,10 @@ export function DashboardToolbar({ className }: { className?: string }) {
     router.refresh();
   }
 
+  function goSetup() {
+    router.push("/settings");
+  }
+
   return (
     <div className={cn("flex shrink-0 flex-nowrap items-center justify-end gap-1.5 md:gap-2", className)}>
       <span
@@ -27,6 +31,18 @@ export function DashboardToolbar({ className }: { className?: string }) {
       >
         목업
       </span>
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className={iconBtn}
+        title="설정 · 셋업 페이지로"
+        aria-label="설정"
+        onClick={goSetup}
+      >
+        <Settings className="size-[17px] stroke-[1] md:size-[18px]" aria-hidden />
+      </Button>
 
       <Button
         type="button"

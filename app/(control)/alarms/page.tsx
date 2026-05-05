@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { AlarmRulesSection } from "@/components/alarms/alarm-rules-section";
 import { RecentAlarms } from "@/components/dashboard/recent-alarms";
 import { buttonVariants } from "@/components/ui/button";
-import { MOCK_ALARM_RULES, MOCK_ALARMS } from "@/lib/dashboard/mock-data";
+import { MOCK_ALARMS } from "@/lib/dashboard/mock-data";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -26,7 +25,6 @@ export default function AlarmsPage() {
         </div>
       </div>
       <RecentAlarms alarms={MOCK_ALARMS} scrollClassName="max-h-[min(50vh,420px)] overflow-y-auto" />
-      <AlarmRulesSection rules={MOCK_ALARM_RULES} />
     </div>
   );
 }

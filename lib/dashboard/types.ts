@@ -60,6 +60,8 @@ export type ClimateSensor = {
   windDirLabel: string;
   /** 일사량 W/m² */
   solarRadiationWm2: number;
+  /** 강우량 mm */
+  rainfallMm: number;
 };
 
 /** IP/edge camera row for Cameras page (mock / future API) */
