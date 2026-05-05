@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Waves, Warehouse } from "lucide-react";
+import { Beaker, Waves, Warehouse } from "lucide-react";
 import Link from "next/link";
 
 import { sideWindowLayout, zoneNumber } from "@/lib/dashboard/greenhouse-vent-rules";
@@ -108,6 +108,12 @@ export function GreenhouseCard({
           </p>
           <ActuatorChip active={zone.irrigationRunning} Icon={Waves} activeLabel="가동" idleLabel="정지" />
         </div>
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          <p className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground md:text-[12px]">
+            양액공급
+          </p>
+          <ActuatorChip active={zone.nutrientSupplyRunning} Icon={Beaker} activeLabel="가동" idleLabel="정지" />
+        </div>
         <div>
           <p className="text-muted-foreground mb-0 text-[10px] font-semibold uppercase tracking-[0.06em] md:mb-0.5 md:text-[12px]">
             개폐
@@ -117,6 +123,7 @@ export function GreenhouseCard({
             <VentLine label="천창 우" open={zone.skylightRightOpen} />
             {side === "left" ? <VentLine label="측창 좌" open={zone.sideWindowLeftOpen} /> : null}
             {side === "right" ? <VentLine label="측창 우" open={zone.sideWindowRightOpen} /> : null}
+            {zone.id === "gh-05" ? <VentLine label="보온커튼" open={zone.thermalCurtainOpen} /> : null}
           </div>
         </div>
       </div>

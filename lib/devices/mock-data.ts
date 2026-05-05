@@ -21,6 +21,7 @@ export function buildInitialDeviceRows(): GreenhouseDeviceRow[] {
       irrigationOn: z.irrigationRunning,
       skylightOpen: z.skylightOpen,
       sideWindowOpen: z.sideWindowOpen,
+      thermalCurtainOpen: z.thermalCurtainOpen,
       flowFanOn: act.flowFan,
       hotAirBlowerOn: act.hotAirBlower,
       sprayerOn: act.sprayer,

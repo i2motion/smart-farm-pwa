@@ -20,8 +20,10 @@ export type TrendMetricKind = "temp" | "humidity" | "soilMoisture" | "soilTemp" 
 /** 온실 구동·스케줄 장비 구분 (목업) */
 export type OperationKind =
   | "irrigation"
+  | "nutrientSupply"
   | "skylight"
   | "sideWindow"
+  | "thermalCurtain"
   | "flowFan"
   | "hotAirBlower"
   | "sprayer"

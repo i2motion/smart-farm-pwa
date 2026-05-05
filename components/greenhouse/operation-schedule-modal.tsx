@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { operationKindLabel } from "@/lib/greenhouse/mock-data";
 import type { OperationKind, OperationSchedule } from "@/lib/greenhouse/types";
-import { cn } from "@/lib/utils";
+import { cn, randomUuid } from "@/lib/utils";
 
 function toPayload(
   greenhouseId: string,
@@ -23,12 +23,13 @@ function toPayload(
     greenhouseId,
     kind,
     name: form.name.trim() || `${label} 스케줄`,
-    driveOn: form.driveOn,
+    /** PLC 연동 시 별도 설정 — 목업에서는 고정 */
+    driveOn: true,
+    enabled: true,
     startTime: form.startTime,
     endTime: form.endTime,
     durationMin: form.durationMin,
     repeat: form.repeat,
-    enabled: form.enabled,
   };
 }
 
@@ -72,12 +73,10 @@ export function OperationScheduleModal({
         setEditingId(row.id);
         setForm({
           name: row.name?.trim() ? row.name : `${operationKindLabel(row.kind)} 스케줄`,
-          driveOn: row.driveOn,
           startTime: row.startTime,
           endTime: row.endTime,
           durationMin: row.durationMin,
           repeat: row.repeat,
-          enabled: row.enabled,
         });
         return;
       }
@@ -101,12 +100,10 @@ export function OperationScheduleModal({
     setEditingId(row.id);
     setForm({
       name: row.name?.trim() ? row.name : `${operationKindLabel(row.kind)} 스케줄`,
-      driveOn: row.driveOn,
       startTime: row.startTime,
       endTime: row.endTime,
       durationMin: row.durationMin,
       repeat: row.repeat,
-      enabled: row.enabled,
     });
   }
 
@@ -154,9 +151,8 @@ export function OperationScheduleModal({
                     )}
                   >
                     <span className="font-medium text-foreground">{r.name}</span>
-                    <span className="tabular-nums">
+                    <span className="tabular-nums text-muted-foreground">
                       {r.startTime} — {r.endTime} · {r.durationMin}분 · {r.repeat}
-                      <span className={r.enabled ? "text-primary/85" : "text-muted-foreground"}> · {r.enabled ? "사용" : "중지"}</span>
                     </span>
                   </button>
                 </li>
@@ -193,7 +189,7 @@ export function OperationScheduleModal({
             <Button
               type="button"
               className="rounded-full text-[12px] font-semibold"
-              onClick={() => onSaveRegister({ id: crypto.randomUUID(), ...toPayload(greenhouseId, kind, form) })}
+              onClick={() => onSaveRegister({ id: randomUuid(), ...toPayload(greenhouseId, kind, form) })}
             >
               등록
             </Button>

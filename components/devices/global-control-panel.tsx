@@ -105,7 +105,7 @@ export function GlobalControlPanel({
         <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3 sm:col-span-2 lg:col-span-2">
           <p className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">전체 구동</p>
           <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 lg:grid-cols-3">
-            <FleetRow label="관수" active={all(rows, "irrigationOn")} onOn={() => onFleetIrrigation(true)} onOff={() => onFleetIrrigation(false)} variant="onoff" />
+            <FleetRow label="급수" active={all(rows, "irrigationOn")} onOn={() => onFleetIrrigation(true)} onOff={() => onFleetIrrigation(false)} variant="onoff" />
             <FleetRow label="천창" active={all(rows, "skylightOpen")} onOn={() => onFleetSkylight(true)} onOff={() => onFleetSkylight(false)} variant="openclose" />
             <FleetRow label="측창" active={all(rows, "sideWindowOpen")} onOn={() => onFleetSideWindow(true)} onOff={() => onFleetSideWindow(false)} variant="openclose" />
             <FleetRow label="유동팬" active={all(rows, "flowFanOn")} onOn={() => onFleetFlowFan(true)} onOff={() => onFleetFlowFan(false)} variant="onoff" />

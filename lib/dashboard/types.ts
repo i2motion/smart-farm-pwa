@@ -15,6 +15,16 @@ export type FarmAlarm = {
   message: string;
 };
 
+/** 알람 규칙(목업) — 설정 화면·알람 페이지에서 공유 */
+export type AlarmRule = {
+  id: string;
+  name: string;
+  scopeLabel: string;
+  sensorLabel: string;
+  conditionSummary: string;
+  enabled: boolean;
+};
+
 export type WorkInstruction = {
   id: string;
   dueDate: string;
@@ -78,6 +88,8 @@ export type GreenhouseZone = {
   mode: ControlMode;
   healthStatus: HealthLevel;
   irrigationRunning: boolean;
+  /** 양액 공급 가동(목업) — 온실 상세·대시보드 카드와 동일 의미 */
+  nutrientSupplyRunning: boolean;
   /** 천창 좌·우 (개별) */
   skylightLeftOpen: boolean;
   skylightRightOpen: boolean;
@@ -88,6 +100,8 @@ export type GreenhouseZone = {
   skylightOpen: boolean;
   /** 측창 하나라도 열림 — 카드·구동 요약 호환 */
   sideWindowOpen: boolean;
+  /** 보온커튼(올림=열림) — 제5동 등 일부 동만 사용 */
+  thermalCurtainOpen: boolean;
 };
 
 /** Edge / gateway health (mock) */

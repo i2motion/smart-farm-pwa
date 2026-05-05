@@ -55,8 +55,10 @@ export function sensorKindLabel(kind: SensorKind): string {
 
 const OPERATION_KIND_LABEL: Record<OperationKind, string> = {
   irrigation: "관수",
+  nutrientSupply: "양액공급",
   skylight: "천창",
-  sideWindow: "측면창",
+  sideWindow: "측창",
+  thermalCurtain: "보온커튼",
   flowFan: "유동팬",
   hotAirBlower: "온풍기",
   sprayer: "분무기",

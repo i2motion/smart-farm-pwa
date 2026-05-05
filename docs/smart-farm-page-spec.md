@@ -3,6 +3,25 @@
 > **범위:** 수집된 스마트팜 기능을 화면별로 정리한다. **UI 구현은 본 문서 범위에 포함하지 않는다.**  
 > **UI 라벨:** 한국어 · **코드/파일/라우트명:** 영어 · **데이터:** 현재·향후 모두 목업 기준, 실 API 미연동.
 
+## 설계 원칙 (간결·기능 완결)
+
+| 원칙 | 설명 |
+|------|------|
+| 한 화면 과부하 금지 | 상세 기능은 전용 페이지로 분리 |
+| 대시보드 | 온실·링크 수준의 **요약만** (카메라·날씨는 한 단계 축약 요약 + 상세 페이지 이동) |
+| 온실 상세 | 해당 동의 센서·알람·구동·차트 |
+| 장비 | 양액공급·플릿 구동·동별 수동 (목업) |
+| 작업 | 지시·일지·사진·AI 보고·제어 초안 |
+| 알람 | 목록 + 규칙 요약(목업) |
+| 날씨 | 3일 시간대별 예보 |
+| 설정 | 농장·PLC·DDNS·카메라·사용자·알림 placeholder |
+
+### 안전
+
+- **AI는 제어를 직접 실행하지 않는다.** 초안·보고는 참고용.
+- **PLC/장비 명령**은 확인 대화상자(목업)를 거친다.
+- **양액공급·온풍기**는 추가 확인(체크) 후 실행 가능하도록 UI 분리.
+
 ---
 
 ## 공통
@@ -25,7 +44,7 @@
 | 5 | `/work` | 작업 |
 | 6 | `/weather` | 날씨 |
 | 7 | `/auction` | 경매 |
-| 8 | `/settings` | 설정 |
+| 8 | `/settings` | 설정 (농장·PLC·DDNS·카메라·사용자·알림 placeholder) |
 
 구 경로(호환): `/auto-manual` → `redirect` 로 `/devices` · `/sensors` → `/dashboard`.
 
@@ -42,9 +61,8 @@
 
 | 한글 영역 | 내용 |
 |-----------|------|
-| 시설 요약 | 농장명, 전체 상태(정상/주의/점검 필요), 목업 텔레메트리 안내 |
 | 지표 타일 | 전체, 자동 존 수, 수동 존 수, 알람(미처리 합), 장비(온라인 수) |
-| 온실 카드 | 존명, 작물, 온도·습도, 자동/수동, 관수·천창·측면 상태, 수동 제어(목업) |
+| 온실 카드 | 존명, 작물, 온도·습도, 자동/수동, 관수·천창·측창 상태, 수동 제어(목업) |
 | 환경 비교 | 실외·오늘 vs 기후 센서 행 정렬 비교, 3일 예보 스트립 |
 | 최근 알람 | 1건, 심각도, 알람/작업 페이지 링크 |
 
@@ -154,6 +172,12 @@
 | 온실 패널(×7) | 동명, 작물, 종합 상태, 현재 모드(자동/수동), 모드 선택, 구동 행, 마지막 명령 시각·요약 |
 | 전체 마지막 명령 | 일괄 조작 시 타임스탬프·요약 문구 |
 
+### 양액공급 UI (감독 전용)
+
+- **웹은 감독(supervisory)만**: 상태·현재 EC/pH(측정 표시), 현재/선택 레시피, 공급 대상, 자동/수동 모드 요청, 공급 시작·중지(확인), 최근 공급 이력 요약, PLC 연결, PLC 화면 열기(placeholder).
+- **웹에서 다루지 않음**: 상세 EC/pH 제어 로직, 펌프·탱크 시퀀스, 인터록 — **양액 PLC·터치 패널**에만 둔다.
+- 구현: `components/devices/nutrient-solution-panel.tsx`, `lib/devices/nutrient-types.ts`, `lib/devices/nutrient-mock-data.ts`.
+
 ### 조작 (Control actions)
 
 | 동작 | 비고 |
@@ -173,6 +197,7 @@
 - `components/devices/global-control-panel.tsx` — 전체 제어
 - `components/devices/greenhouse-device-panel.tsx` — 동별 카드
 - `components/devices/device-control-button.tsx`, `mode-selector.tsx`, `devices-confirm-dialog.tsx`
+- `components/devices/nutrient-solution-panel.tsx` — 양액 감독(목업)
 
 ### 향후 API (Future API requirements)
 
@@ -195,14 +220,31 @@
 ### 목적 (Purpose)
 
 - 알람 목록·작업 지시(워크 오더) 운영 큐.
+- **`/work`** 에서 **농사일지(Farm Diary)** 를 구조화 입력층으로 포함한다. 일지는 단순 메모가 아니라 향후 AI 분석·제어 명령 생성의 **정형 입력 소스**로 설계한다.
 - 알람 **규칙 등록** UI는 본 페이지 또는 설정과 **한곳에 일원화** 권장.
+
+### `/work` 페이지 구조 (탭)
+
+| 탭 (한글) | 역할 |
+|-----------|------|
+| 작업할 업무 | 기존 작업 지시 큐 (`MOCK_WORK_INSTRUCTIONS`) |
+| 농사일지 | 구조화 일지 입력·목록·필터·상세 (목업 로컬 state) |
+| AI 운영보고 | 일지 요약 기반 **참고용** 모의 보고 (실 AI 미연동) |
+| 제어명령 초안 | AI가 생성했다고 가정하는 **설정 초안** 카드. **실행 금지·초안만**. 사람 승인 전까지 PLC/API 미반영 |
+
+### 안전·정책
+
+- **AI는 제어를 직접 실행하지 않는다.** 제어명령 초안은 항상 초안 상태이며, 승인·현장 확인 후 별도 실행 계층에서만 반영한다 (현재 UI는 목업).
+- **AI 운영보고는 참고용**이며 자동 조치를 수행하지 않는다.
 
 ### 표시 항목 (Display items)
 
 | 한글 | 내용 |
 |------|------|
-| 알람 목록 | 시간, 심각도, 유형, 메시지, 온실명 |
+| 알람 목록 (`/alarms`) | 시간, 심각도, 유형, 메시지, 온실명 |
 | 작업 지시 | 작업 유형, 온실, 지시 문구, 마감, 상태(대기/진행/완료) |
+| 농사일지 | 날짜·시간·온실·작물·작업 유형·내용·작업자·센서/장비 태그·중요도·AI 분석 플래그 등 |
+| 제어명령 초안 | 대상 온실·장비·제안 명령·이유·관련 일지·센서 스냅샷·위험도·실행 상태(초안/승인 등 목업) |
 
 ### 조작 (Control actions)
 
@@ -211,6 +253,8 @@
 | 목록 스크롤 | 현재 |
 | 알람 확인·작업 상태 변경 | 향후 |
 | 규칙 CRUD | 향후 · 설정과 역할 분리 |
+| 일지 등록·필터·상세 보기 | 목업 로컬 상태만 갱신 |
+| 초안 승인/보류/거부/명령 수정 | 목업 상태만; 실 PLC 미연동 |
 
 ### 필요 목업 데이터 (Mock data needed)
 
@@ -218,16 +262,21 @@
 |--------|------|
 | 알람 | `MOCK_ALARMS` |
 | 작업 지시 | `MOCK_WORK_INSTRUCTIONS` |
+| 농사일지·AI 보고·제어 초안 | `lib/work/mock-data.ts`, 타입 `lib/work/types.ts` |
 
 ### 향후 API (Future API requirements)
 
 - `GET /alarms`, `PATCH /alarms/{id}/ack`
 - `GET /work-instructions`, `PATCH /work-instructions/{id}`
 - `GET/POST/PUT /alarm-rules`
+- 농사일지: `GET /farm-diary`, `POST /farm-diary`, `PUT /farm-diary/{id}`, `DELETE /farm-diary/{id}`
+- AI(향후): `POST /ai/analyze-diary`, `GET /ai/control-order-drafts`, `PATCH /ai/control-order-drafts/{id}/approve`, `PATCH .../hold`, `PATCH .../reject`
+
+플레이스홀더 함수·경로 상수: `lib/work/api-placeholders.ts` (현재 호출 없음).
 
 ### 개발 우선순위 (Development priority)
 
-- **P1** — 목록 UX · **P2** — 규칙 편집 위치·API
+- **P1** — 목록 UX · **P2** — 규칙 편집 위치·API · 일지·AI 백엔드 연동 시 `api-placeholders` 대체
 
 ---
 
@@ -319,13 +368,13 @@
 
 | 역할 | 파일 예시 |
 |------|-----------|
-| 대시보드 뷰 | `components/dashboard/dashboard-shell.tsx`, `farm-overview.tsx`, `greenhouse-grid.tsx`, `environment-section.tsx`, `environment-compare.tsx`, `latest-alarm.tsx` |
+| 대시보드 뷰 | `components/dashboard/dashboard-shell.tsx`, `greenhouse-grid.tsx`, `environment-section.tsx`, `environment-compare.tsx`, `latest-alarm.tsx` |
 | 온실 상세·구동 스케줄(목업) | `app/(control)/greenhouses/[id]/page.tsx`, `components/greenhouse/greenhouse-detail-shell.tsx`, `components/dashboard/control-button-group.tsx`, `operation-schedule-modal.tsx`, `lib/greenhouse/types.ts` |
 | 카메라 페이지 | `app/(control)/cameras/page.tsx` |
 | 자동/수동(redirect) | `app/(control)/auto-manual/page.tsx` → `/devices` |
 | 센서(redirect) | `app/(control)/sensors/page.tsx` → `/dashboard` |
 | 장비 · 구동 센터 | `app/(control)/devices/page.tsx`, `components/devices/devices-page-shell.tsx`, `global-control-panel.tsx`, `greenhouse-device-panel.tsx`, `lib/devices/*` |
-| 알람·작업 | `app/(control)/alarms/page.tsx`, `app/(control)/work/page.tsx` (및 `alarms-work` 레거시 라우트가 있으면 별도) |
+| 알람·작업 | `app/(control)/alarms/page.tsx`, `app/(control)/work/page.tsx`, `components/work/work-page-shell.tsx`, `components/work/farm-diary-*.tsx`, `components/work/ai-operation-report.tsx`, `components/work/control-order-*.tsx`, `lib/work/*` (및 `alarms-work` 레거시 라우트가 있으면 별도) |
 | 날씨 | `app/(control)/weather/page.tsx` |
 | 자동/수동 UI(레거시 컴포넌트) | `components/auto-manual/auto-manual-panel.tsx` (필요 시 재사용) |
 | 목업 | `lib/dashboard/mock-data.ts`, `lib/dashboard/types.ts` |

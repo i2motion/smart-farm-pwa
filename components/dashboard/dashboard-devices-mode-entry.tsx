@@ -48,7 +48,7 @@ export function DashboardDevicesModeEntry() {
           </span>
         </div>
         <p className="text-muted-foreground mt-1 max-w-xl text-[13px] leading-snug md:mt-1.5 md:text-[14px] md:leading-relaxed">
-          전 동 운전 모드 요약(목업). 실제 일괄 반영은 장비 페이지에서 확인합니다.
+          요약용 목업 토글입니다. 양액·구동 상세는 장비 페이지에서 하세요.
         </p>
         <div className="mt-3 max-w-md md:mt-3.5" data-devices-mode-toggle>
           <ModeSelector mode={fleetMode} onChange={setFleetMode} />

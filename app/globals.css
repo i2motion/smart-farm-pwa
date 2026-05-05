@@ -39,6 +39,9 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  /* Shared blue accent — maps to primary; use bg-interactive / ring-interactive in components */
+  --color-interactive-foreground: var(--interactive-foreground);
+  --color-interactive: var(--interactive);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -59,10 +62,33 @@
   --foreground: oklch(0.96 0.01 264);
   --card: oklch(0.27 0.02 264);
   --card-foreground: oklch(0.96 0.01 264);
-  --popover: oklch(0.29 0.021 264);
-  --popover-foreground: oklch(0.96 0.01 264);
+
+  /** 단일 블루 크로마 소스 — 버튼·스위치·셀렉트·링·차트 강조 공통 */
   --primary: oklch(0.58 0.11 252);
   --primary-foreground: oklch(0.98 0.005 252);
+  --ring: oklch(0.55 0.1 252);
+
+  /**
+   * Interactive accent — semantic aliases (= primary). 새 컴포넌트는 interactive 토큰 우선 사용.
+   * Tailwind: bg-interactive, text-interactive-foreground, ring-interactive
+   */
+  --interactive: var(--primary);
+  --interactive-foreground: var(--primary-foreground);
+  --interactive-hover: color-mix(in oklch, var(--primary) 78%, black);
+  --interactive-muted: color-mix(in oklch, var(--primary) 22%, transparent);
+  --interactive-ring: var(--ring);
+  --interactive-border-subtle: color-mix(in oklch, var(--primary) 30%, transparent);
+
+  /* Floating surfaces — 드롭다운 행은 --interactive 계열 */
+  --popover: oklch(0.13 0.006 285);
+  --popover-foreground: oklch(0.97 0.01 264);
+  --dropdown-border: oklch(1 0 0 / 14%);
+  --dropdown-item-text: oklch(0.93 0.014 264);
+  --dropdown-item-muted: oklch(0.62 0.03 252);
+  --dropdown-item-hover-bg: var(--interactive-muted);
+  --dropdown-item-hover-text: var(--foreground);
+  --dropdown-item-selected-bg: var(--interactive);
+  --dropdown-item-selected-text: var(--interactive-foreground);
   --secondary: oklch(0.32 0.02 264);
   --secondary-foreground: oklch(0.94 0.01 264);
   --muted: oklch(0.3 0.018 264);
@@ -72,8 +98,7 @@
   --destructive: oklch(0.52 0.16 25);
   --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 13%);
-  --ring: oklch(0.55 0.1 252);
-  --chart-1: oklch(0.58 0.11 252);
+  --chart-1: var(--primary);
   --chart-2: oklch(0.55 0.06 264);
   --chart-3: oklch(0.48 0.05 264);
   --chart-4: oklch(0.65 0.05 264);
@@ -81,12 +106,12 @@
   --radius: 1rem;
   --sidebar: oklch(0.24 0.018 264);
   --sidebar-foreground: oklch(0.96 0.01 264);
-  --sidebar-primary: oklch(0.58 0.11 252);
-  --sidebar-primary-foreground: oklch(0.98 0.005 252);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: oklch(0.32 0.02 264);
   --sidebar-accent-foreground: oklch(0.96 0.01 264);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.55 0.1 252);
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {
@@ -101,6 +126,163 @@
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
+  }
+
+  /**
+   * Native <select> / <option> — dark dropdown list, readable items, blue selection.
+   * Utility classes on selects still override via Tailwind layers.
+   */
+  select {
+    color-scheme: dark;
+    border-radius: 0.5rem;
+    border: 1px solid var(--dropdown-border);
+    background-color: oklch(0.2 0.021 264 / 0.92);
+    color: var(--foreground);
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
+  }
+
+  select:hover:not(:disabled) {
+    border-color: oklch(1 0 0 / 18%);
+    background-color: oklch(0.23 0.024 264 / 0.95);
+  }
+
+  select:focus-visible {
+    outline: none;
+    border-color: var(--interactive-ring);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--interactive-ring) 50%, transparent);
+  }
+
+  select:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Native option list — explicit dark surface + light text (fixes white-on-white in WebKit) */
+  select option {
+    background-color: var(--popover);
+    color: var(--dropdown-item-text);
+    padding: 0.45rem 0.65rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  select option:hover,
+  select option:focus-visible {
+    background-color: var(--dropdown-item-hover-bg);
+    color: var(--dropdown-item-hover-text);
+  }
+
+  select option:checked {
+    background-color: var(--dropdown-item-selected-bg);
+    color: var(--dropdown-item-selected-text);
+    font-weight: 600;
+  }
+
+  select option[value=""] {
+    color: var(--dropdown-item-muted);
+  }
+
+  /* Closed select showing placeholder option */
+  select:has(option[value=""]:checked) {
+    color: var(--dropdown-item-muted);
+  }
+
+  select:has(option[value=""]:checked):focus-visible {
+    color: var(--foreground);
+  }
+
+  /**
+   * 센서 요약 알람명 select — primary 토큰 = 운전 모드(자동/수동) 활성 버튼과 동일 계열
+   */
+  .dark select.sf-alarm-name-select {
+    color-scheme: dark;
+    accent-color: var(--interactive);
+  }
+
+  .dark select.sf-alarm-name-select option {
+    background-color: var(--popover);
+    color: var(--dropdown-item-text);
+  }
+
+  .dark select.sf-alarm-name-select option[value=""] {
+    color: var(--dropdown-item-muted);
+  }
+
+  .dark select.sf-alarm-name-select option:hover {
+    background-color: var(--dropdown-item-hover-bg);
+    color: var(--dropdown-item-hover-text);
+  }
+
+  .dark select.sf-alarm-name-select option:checked {
+    background-color: var(--interactive);
+    color: var(--interactive-foreground);
+    font-weight: 600;
+  }
+
+  /**
+   * Popover / Combobox / Dropdown / Listbox (shadcn data-slot + ARIA)
+   * Logic unchanged — surface tokens only.
+   */
+  .dark [data-slot="popover-content"],
+  .dark [data-slot="dropdown-menu-content"],
+  .dark [data-slot="dropdown-menu-sub-content"],
+  .dark [data-slot="select-content"],
+  .dark [data-slot="combobox-content"],
+  .dark [data-slot="combobox-list"],
+  .dark [data-slot="listbox"] {
+    border-radius: 0.75rem;
+    border: 1px solid var(--dropdown-border);
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: 0 16px 48px oklch(0.05 0.02 264 / 0.55);
+  }
+
+  .dark [data-slot="select-item"],
+  .dark [data-slot="dropdown-menu-item"],
+  .dark [data-slot="combobox-item"],
+  .dark [role="listbox"] [role="option"],
+  .dark [role="menu"] [role="menuitem"]:not([disabled]),
+  .dark [role="menu"] [role="menuitemcheckbox"],
+  .dark [role="menu"] [role="menuitemradio"] {
+    border-radius: 0.5rem;
+    color: var(--dropdown-item-text);
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+
+  .dark [data-slot="select-item"]:hover,
+  .dark [data-slot="select-item"][data-highlighted],
+  .dark [data-slot="dropdown-menu-item"]:hover,
+  .dark [data-slot="dropdown-menu-item"][data-highlighted],
+  .dark [data-slot="combobox-item"]:hover,
+  .dark [data-slot="combobox-item"][data-highlighted],
+  .dark [role="listbox"] [role="option"]:hover,
+  .dark [role="listbox"] [role="option"][data-highlighted],
+  .dark [role="menu"] [role="menuitem"]:hover,
+  .dark [role="menu"] [role="menuitem"][data-highlighted] {
+    background-color: var(--dropdown-item-hover-bg);
+    color: var(--dropdown-item-hover-text);
+  }
+
+  .dark [data-slot="select-item"][data-state="checked"],
+  .dark [data-slot="select-item"][aria-selected="true"],
+  .dark [data-slot="dropdown-menu-item"][data-state="checked"],
+  .dark [data-slot="combobox-item"][aria-selected="true"],
+  .dark [role="listbox"] [role="option"][aria-selected="true"],
+  .dark [role="menu"] [role="menuitem"][aria-checked="true"] {
+    background-color: var(--interactive);
+    color: var(--interactive-foreground);
+    font-weight: 600;
+  }
+
+  /* Placeholder / muted rows inside custom selects */
+  .dark [data-slot="select-item"][data-disabled],
+  .dark [data-slot="combobox-item"][aria-disabled="true"] {
+    color: var(--dropdown-item-muted);
+    opacity: 1;
   }
 }
 
@@ -113,6 +295,14 @@
   }
   .sf-surface {
     @apply rounded-2xl border border-white/[0.09] bg-white/[0.06] backdrop-blur-md shadow-none;
+  }
+  /** Manual popover / listbox wrapper — same tokens as [data-slot] dropdown surfaces */
+  .sf-dropdown-panel {
+    border-radius: 0.75rem;
+    border: 1px solid var(--dropdown-border);
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: 0 16px 48px oklch(0.05 0.02 264 / 0.55);
   }
   .sf-section-label {
     @apply text-[12px] font-semibold uppercase tracking-[0.1em] text-muted-foreground md:text-[13px] md:tracking-[0.12em];
@@ -128,6 +318,17 @@
   }
   .sf-tesla-hover:hover {
     @apply scale-[1.01] shadow-[0_12px_40px_rgba(0,0,0,0.28)];
+  }
+
+  /**
+   * Shared interactive chrome — optional wrapper for custom controls (tabs, chips, inline toggles)
+   * Matches Button default / Switch checked / native select focus ring.
+   */
+  .sf-interactive-focus {
+    @apply outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+  .sf-interactive-ring-box {
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--interactive-ring) 50%, transparent);
   }
 }
 

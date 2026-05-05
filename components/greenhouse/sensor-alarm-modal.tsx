@@ -1,16 +1,17 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { SensorAlarmForm, type SensorAlarmFormValues } from "@/components/greenhouse/sensor-alarm-form";
 import { Button } from "@/components/ui/button";
 import type { SensorAlarmRule, SensorKind } from "@/lib/greenhouse/types";
 import { sensorKindLabel } from "@/lib/greenhouse/mock-data";
-import { cn } from "@/lib/utils";
+import { cn, randomUuid } from "@/lib/utils";
 
 function defaultForm(sensor: SensorKind): SensorAlarmFormValues {
   return {
+    sensorKind: sensor,
     alarmName: `${sensorKindLabel(sensor)} 알람`,
     sensorLabel: sensorKindLabel(sensor),
     setValue: 0,
@@ -22,11 +23,28 @@ function defaultForm(sensor: SensorKind): SensorAlarmFormValues {
   };
 }
 
+function ruleToForm(rule: SensorAlarmRule): SensorAlarmFormValues {
+  return {
+    sensorKind: rule.sensorKind,
+    alarmName: rule.alarmName,
+    sensorLabel: sensorKindLabel(rule.sensorKind),
+    setValue: rule.setValue,
+    condition: rule.condition,
+    enabled: rule.enabled,
+    notifyIntervalMin: rule.notifyIntervalMin,
+    dndRange: rule.dndRange,
+    repeatCount: rule.repeatCount,
+  };
+}
+
 export type SensorAlarmModalProps = {
   open: boolean;
   greenhouseId: string;
-  sensor: SensorKind | null;
   rules: SensorAlarmRule[];
+  /** 수정 시 규칙 id — 없으면 신규 */
+  editingRuleId: string | null;
+  /** 신규 시 초기 센서(null이면 폼에서 센서 선택) */
+  presetSensorKind: SensorKind | null;
   onClose: () => void;
   onSaveRegister: (rule: SensorAlarmRule) => void;
   onSaveEdit: (rule: SensorAlarmRule) => void;
@@ -36,40 +54,64 @@ export type SensorAlarmModalProps = {
 export function SensorAlarmModal({
   open,
   greenhouseId,
-  sensor,
   rules,
+  editingRuleId,
+  presetSensorKind,
   onClose,
   onSaveRegister,
   onSaveEdit,
   onDelete,
 }: SensorAlarmModalProps) {
-  const existing = useMemo(() => {
-    if (!sensor) return undefined;
-    return rules.find((r) => r.greenhouseId === greenhouseId && r.sensorKind === sensor);
-  }, [rules, greenhouseId, sensor]);
-
   const [form, setForm] = useState<SensorAlarmFormValues>(() => defaultForm("temp"));
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [localEditingId, setLocalEditingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open || !sensor) return;
-    if (existing) {
-      setEditingId(existing.id);
-      setForm({
-        alarmName: existing.alarmName,
-        sensorLabel: sensorKindLabel(sensor),
-        setValue: existing.setValue,
-        condition: existing.condition,
-        enabled: existing.enabled,
-        notifyIntervalMin: existing.notifyIntervalMin,
-        dndRange: existing.dndRange,
-        repeatCount: existing.repeatCount,
-      });
-    } else {
-      setEditingId(null);
-      setForm(defaultForm(sensor));
+    if (!open) return;
+    if (editingRuleId) {
+      const rule = rules.find((r) => r.id === editingRuleId);
+      if (rule) {
+        setLocalEditingId(rule.id);
+        setForm(ruleToForm(rule));
+        return;
+      }
     }
-  }, [open, sensor, existing]);
+    setLocalEditingId(null);
+    const base = presetSensorKind ?? "temp";
+    setForm(defaultForm(base));
+  }, [open, editingRuleId, presetSensorKind, rules]);
+
+  const registryItems = useMemo(
+    () =>
+      rules
+        .filter((r) => r.greenhouseId === greenhouseId && r.sensorKind === form.sensorKind)
+        .map((r) => ({ id: r.id, alarmName: r.alarmName })),
+    [rules, greenhouseId, form.sensorKind]
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    if (!localEditingId) return;
+    if (!registryItems.some((x) => x.id === localEditingId)) {
+      setLocalEditingId(null);
+      setForm((f) => defaultForm(f.sensorKind));
+    }
+  }, [open, registryItems, localEditingId]);
+
+  const handleRegistrySelect = useCallback(
+    (id: string | null) => {
+      if (!id) {
+        setLocalEditingId(null);
+        setForm((f) => defaultForm(f.sensorKind));
+        return;
+      }
+      const rule = rules.find((r) => r.id === id && r.greenhouseId === greenhouseId);
+      if (rule) {
+        setLocalEditingId(rule.id);
+        setForm(ruleToForm(rule));
+      }
+    },
+    [rules, greenhouseId]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -81,17 +123,16 @@ export function SensorAlarmModal({
   }, [open, onClose]);
 
   if (!open) return null;
-  if (sensor == null) return null;
+
+  const pickSensor = !localEditingId && presetSensorKind == null;
 
   function toRule(id: string): SensorAlarmRule {
-    if (sensor == null) {
-      throw new Error("SensorAlarmModal: sensor required when building rule");
-    }
+    const name = form.alarmName.trim();
     return {
       id,
       greenhouseId,
-      sensorKind: sensor,
-      alarmName: form.alarmName,
+      sensorKind: form.sensorKind,
+      alarmName: name || `${sensorKindLabel(form.sensorKind)} 알람`,
       setValue: form.setValue,
       condition: form.condition,
       enabled: form.enabled,
@@ -125,22 +166,33 @@ export function SensorAlarmModal({
             <X className="size-4 stroke-[1]" />
           </Button>
         </div>
-        <p className="text-muted-foreground mt-1 text-[12px]">목업 — API 미연동</p>
+        <p className="text-muted-foreground mt-1 text-[12px]">
+          목업 — API 미연동 · 등록 알람은 상단에서 선택하거나 「새 알람 등록」으로 추가합니다.
+        </p>
         <div className="mt-4">
-          <SensorAlarmForm values={form} onChange={setForm} />
+          <SensorAlarmForm
+            values={form}
+            onChange={setForm}
+            pickSensor={pickSensor}
+            alarmRegistry={{
+              items: registryItems,
+              selectedId: localEditingId,
+              onSelect: handleRegistrySelect,
+            }}
+          />
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          {editingId ? (
+          {localEditingId ? (
             <>
-              <Button type="button" variant="secondary" className="rounded-full text-[12px] font-semibold" onClick={() => onSaveEdit(toRule(editingId))}>
+              <Button type="button" variant="secondary" className="rounded-full text-[12px] font-semibold" onClick={() => onSaveEdit(toRule(localEditingId))}>
                 수정
               </Button>
-              <Button type="button" variant="destructive" className="rounded-full text-[12px] font-semibold" onClick={() => onDelete(editingId)}>
+              <Button type="button" variant="destructive" className="rounded-full text-[12px] font-semibold" onClick={() => onDelete(localEditingId)}>
                 삭제
               </Button>
             </>
           ) : (
-            <Button type="button" className="rounded-full text-[12px] font-semibold" onClick={() => onSaveRegister(toRule(crypto.randomUUID()))}>
+            <Button type="button" className="rounded-full text-[12px] font-semibold" onClick={() => onSaveRegister(toRule(randomUuid()))}>
               등록
             </Button>
           )}

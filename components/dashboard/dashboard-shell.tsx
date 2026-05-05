@@ -19,20 +19,24 @@ export function DashboardShell() {
   if (!today || !tomorrow || !sensor) return null;
 
   return (
-    <div className="relative mx-auto min-h-0 w-full max-w-[min(100%,1400px)] space-y-1 md:space-y-4 lg:max-w-[min(100%,1520px)] lg:space-y-3.5 xl:max-w-[min(100%,1680px)] xl:space-y-3.5 2xl:max-w-[min(100%,1820px)]">
-      <DashboardCameraPreview cameras={MOCK_CAMERAS} />
-
-      <DashboardWeatherCard
-        today={today}
-        tomorrow={tomorrow}
-        sunrise={MOCK_DASHBOARD_SKY.sunrise}
-        sunset={MOCK_DASHBOARD_SKY.sunset}
-        sensor={sensor}
-      />
+    <div className="relative mx-auto min-h-0 w-full max-w-[min(100%,1400px)] space-y-3 md:space-y-4 lg:max-w-[min(100%,1520px)] lg:space-y-4">
+      <div className="flex flex-col gap-3 md:gap-4">
+        <DashboardCameraPreview cameras={MOCK_CAMERAS} />
+        <DashboardWeatherCard
+          today={today}
+          tomorrow={tomorrow}
+          sunrise={MOCK_DASHBOARD_SKY.sunrise}
+          sunset={MOCK_DASHBOARD_SKY.sunset}
+          sensor={sensor}
+        />
+      </div>
 
       <DashboardDevicesModeEntry />
 
-      <GreenhouseGrid zones={MOCK_GREENHOUSES} />
+      <div>
+        <p className="text-muted-foreground mb-2 text-[11px] font-semibold uppercase tracking-[0.1em]">온실 요약</p>
+        <GreenhouseGrid zones={MOCK_GREENHOUSES} />
+      </div>
     </div>
   );
 }

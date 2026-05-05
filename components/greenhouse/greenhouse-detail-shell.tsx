@@ -21,8 +21,10 @@ import { cn } from "@/lib/utils";
 function keyToOperationKind(key: ControlButtonGroupKey): OperationKind {
   const m: Record<ControlButtonGroupKey, OperationKind> = {
     irrigation: "irrigation",
+    nutrientSupply: "nutrientSupply",
     skylight: "skylight",
     sideWindow: "sideWindow",
+    thermalCurtain: "thermalCurtain",
     flowFan: "flowFan",
     hotAirBlower: "hotAirBlower",
     exhaustFan: "exhaustFan",
@@ -92,8 +94,10 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
 
   const [mode, setMode] = useState<ControlMode>(zone.mode);
   const [irrigationOn, setIrrigationOn] = useState(zone.irrigationRunning);
+  const [nutrientSupplyOn, setNutrientSupplyOn] = useState(zone.nutrientSupplyRunning);
   const [skylightOpen, setSkylightOpen] = useState(zone.skylightOpen);
   const [sideWindowOpen, setSideWindowOpen] = useState(zone.sideWindowOpen);
+  const [thermalCurtainOpen, setThermalCurtainOpen] = useState(zone.thermalCurtainOpen);
   const initialFans =
     MOCK_GREENHOUSE_FAN_ACTUATORS[zone.id] ?? { flowFan: false, hotAirBlower: false, exhaustFan: false, sprayer: false };
   const [flowFanOn, setFlowFanOn] = useState(initialFans.flowFan);
@@ -106,7 +110,8 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
   const [schedulePick, setSchedulePick] = useState<Partial<Record<ControlButtonGroupKey, string | null>>>({});
   const [scheduleDialog, setScheduleDialog] = useState<{ kind: OperationKind; editId?: string } | null>(null);
   const [alarmOpen, setAlarmOpen] = useState(false);
-  const [alarmSensor, setAlarmSensor] = useState<SensorKind | null>(null);
+  const [alarmEditingRuleId, setAlarmEditingRuleId] = useState<string | null>(null);
+  const [alarmPresetSensor, setAlarmPresetSensor] = useState<SensorKind | null>(null);
 
   useEffect(() => {
     setSchedulePick((prev) => {
@@ -127,20 +132,39 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
 
   const actuators = {
     irrigationOn,
+    nutrientSupplyOn,
     skylightOpen,
     sideWindowOpen,
+    thermalCurtainOpen,
     flowFanOn,
     hotAirBlowerOn,
     exhaustFanOn,
     sprayerOn,
     onIrrigationChange: setIrrigationOn,
+    onNutrientSupplyChange: setNutrientSupplyOn,
     onSkylightChange: setSkylightOpen,
     onSideWindowChange: setSideWindowOpen,
+    onThermalCurtainChange: setThermalCurtainOpen,
     onFlowFanChange: setFlowFanOn,
     onHotAirBlowerChange: setHotAirBlowerOn,
     onExhaustFanChange: setExhaustFanOn,
     onSprayerChange: setSprayerOn,
   };
+
+  const controlVisible: ControlButtonGroupKey[] =
+    zone.id === "gh-05"
+      ? [
+          "irrigation",
+          "nutrientSupply",
+          "skylight",
+          "sideWindow",
+          "thermalCurtain",
+          "flowFan",
+          "hotAirBlower",
+          "exhaustFan",
+          "sprayer",
+        ]
+      : ["irrigation", "nutrientSupply", "skylight", "sideWindow", "flowFan", "hotAirBlower", "exhaustFan", "sprayer"];
 
   return (
     <div className="mx-auto w-full max-w-[min(100%,960px)] space-y-5 pb-16 md:space-y-7 md:pb-20">
@@ -192,31 +216,31 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
       <SensorSummary
         snapshot={snapshot}
         onOpenAlarm={(kind) => {
-          setAlarmSensor(kind);
+          setAlarmEditingRuleId(null);
+          setAlarmPresetSensor(kind);
           setAlarmOpen(true);
         }}
       />
 
-      <section aria-labelledby="gh-controls-heading" className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-md md:rounded-3xl md:p-5">
-        <h2 id="gh-controls-heading" className="sf-section-label mb-3">
+      <section aria-labelledby="gh-controls-heading" className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-3 backdrop-blur-md sm:p-4 md:rounded-3xl md:p-5">
+        <h2 id="gh-controls-heading" className="sf-section-label mb-2 sm:mb-3">
           구동 제어
         </h2>
-        <p className="text-muted-foreground mb-3 text-[11px] leading-relaxed md:text-[12px]">목업 토글 및 스케줄 — 실제 PLC·MQTT 미연결</p>
-        <div className="mb-4 max-w-md">
-          <p className="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-[0.08em]">운전 모드</p>
+        <p className="text-muted-foreground mb-2 text-[11px] leading-relaxed sm:mb-3 md:text-[12px]">목업 토글 및 스케줄 — 실제 PLC·MQTT 미연결</p>
+        <div className="mb-3 max-w-md sm:mb-4">
+          <p className="text-muted-foreground mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] sm:mb-2">운전 모드</p>
           <ModeToggle mode={mode} onChange={setMode} />
         </div>
         <ControlButtonGroup
           {...actuators}
-          visible={["irrigation", "skylight", "sideWindow", "flowFan", "hotAirBlower", "exhaustFan", "sprayer"]}
-          className="max-w-xl"
+          visible={controlVisible}
+          className="w-full max-w-xl"
           schedule={{
             schedules,
             onSchedulesChange: setSchedules,
             selectedScheduleIdByKey: schedulePick,
             onSelectScheduleIdByKey: (key, id) => setSchedulePick((p) => ({ ...p, [key]: id })),
             onOpenScheduleRegister: (key) => setScheduleDialog({ kind: keyToOperationKind(key) }),
-            onOpenScheduleEdit: (key, id) => setScheduleDialog({ kind: keyToOperationKind(key), editId: id }),
           }}
         />
       </section>
@@ -295,26 +319,31 @@ export function GreenhouseDetailShell({ zone }: GreenhouseDetailShellProps) {
       <SensorAlarmModal
         open={alarmOpen}
         greenhouseId={zone.id}
-        sensor={alarmSensor}
         rules={sensorAlarms}
+        editingRuleId={alarmEditingRuleId}
+        presetSensorKind={alarmPresetSensor}
         onClose={() => {
           setAlarmOpen(false);
-          setAlarmSensor(null);
+          setAlarmEditingRuleId(null);
+          setAlarmPresetSensor(null);
         }}
         onSaveRegister={(rule) => {
-          setSensorAlarms((prev) => [...prev.filter((r) => !(r.greenhouseId === rule.greenhouseId && r.sensorKind === rule.sensorKind)), rule]);
+          setSensorAlarms((prev) => [...prev, rule]);
           setAlarmOpen(false);
-          setAlarmSensor(null);
+          setAlarmEditingRuleId(null);
+          setAlarmPresetSensor(null);
         }}
         onSaveEdit={(rule) => {
           setSensorAlarms((prev) => prev.map((r) => (r.id === rule.id ? rule : r)));
           setAlarmOpen(false);
-          setAlarmSensor(null);
+          setAlarmEditingRuleId(null);
+          setAlarmPresetSensor(null);
         }}
         onDelete={(id) => {
           setSensorAlarms((prev) => prev.filter((r) => r.id !== id));
           setAlarmOpen(false);
-          setAlarmSensor(null);
+          setAlarmEditingRuleId(null);
+          setAlarmPresetSensor(null);
         }}
       />
     </div>

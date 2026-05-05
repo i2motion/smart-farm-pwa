@@ -111,7 +111,7 @@ export function FleetDeviceControls() {
         <ControlButtonGroup {...actuators} visible={["skylight"]} />
       </SectionCard>
 
-      <SectionCard title="측면창" description="측벽 루버 · 목업" icon={PanelRightOpen}>
+      <SectionCard title="측창" description="측벽 루버 · 목업" icon={PanelRightOpen}>
         <ControlButtonGroup {...actuators} visible={["sideWindow"]} />
       </SectionCard>
 

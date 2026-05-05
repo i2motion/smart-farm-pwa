@@ -99,13 +99,13 @@ export function GreenhouseDevicePanel({ row, onModeChange, onActuatorChange }: G
       ) : null}
 
       <div className={cn("mt-3 space-y-2.5 rounded-xl border border-white/[0.05] bg-black/20 p-3", caution && "border-amber-400/15")}>
-        <ControlRow label="관수" caution={caution}>
+        <ControlRow label="급수(원수)" caution={caution}>
           <DeviceControlButton
             variant="onoff"
             active={row.irrigationOn}
             cautionInAuto={caution}
-            onActive={() => onActuatorChange(row.zoneId, "irrigationOn", true, "관수 켜기")}
-            onInactive={() => onActuatorChange(row.zoneId, "irrigationOn", false, "관수 끄기")}
+            onActive={() => onActuatorChange(row.zoneId, "irrigationOn", true, "급수 켜기")}
+            onInactive={() => onActuatorChange(row.zoneId, "irrigationOn", false, "급수 끄기")}
           />
         </ControlRow>
         <ControlRow label="천창" caution={caution}>
@@ -126,6 +126,17 @@ export function GreenhouseDevicePanel({ row, onModeChange, onActuatorChange }: G
             onInactive={() => onActuatorChange(row.zoneId, "sideWindowOpen", false, "측창 닫기")}
           />
         </ControlRow>
+        {row.zoneId === "gh-05" ? (
+          <ControlRow label="보온커튼" caution={caution}>
+            <DeviceControlButton
+              variant="openclose"
+              active={row.thermalCurtainOpen}
+              cautionInAuto={caution}
+              onActive={() => onActuatorChange(row.zoneId, "thermalCurtainOpen", true, "보온커튼 열기")}
+              onInactive={() => onActuatorChange(row.zoneId, "thermalCurtainOpen", false, "보온커튼 닫기")}
+            />
+          </ControlRow>
+        ) : null}
         <ControlRow label="유동팬" caution={caution}>
           <DeviceControlButton
             variant="onoff"

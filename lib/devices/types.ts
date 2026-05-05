@@ -10,6 +10,7 @@ export type GreenhouseDeviceRow = {
   irrigationOn: boolean;
   skylightOpen: boolean;
   sideWindowOpen: boolean;
+  thermalCurtainOpen: boolean;
   flowFanOn: boolean;
   hotAirBlowerOn: boolean;
   sprayerOn: boolean;
@@ -22,6 +23,7 @@ export type DeviceActuatorKey =
   | "irrigationOn"
   | "skylightOpen"
   | "sideWindowOpen"
+  | "thermalCurtainOpen"
   | "flowFanOn"
   | "hotAirBlowerOn"
   | "sprayerOn";

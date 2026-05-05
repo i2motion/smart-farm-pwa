@@ -53,6 +53,7 @@ export function SensorSummary({ snapshot, onOpenAlarm }: SensorSummaryProps) {
             sub={c.sub}
             icon={c.icon}
             onOpenAlarm={onOpenAlarm}
+            className="min-w-0"
           />
         ))}
       </div>

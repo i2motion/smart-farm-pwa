@@ -2,28 +2,23 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 export type OperationScheduleFormValues = {
   name: string;
-  driveOn: boolean;
   startTime: string;
   endTime: string;
   durationMin: number;
   repeat: string;
-  enabled: boolean;
 };
 
 export function defaultScheduleForm(displayKind: string): OperationScheduleFormValues {
   return {
     name: `${displayKind} 스케줄`,
-    driveOn: false,
     startTime: "06:00",
     endTime: "06:30",
     durationMin: 30,
     repeat: "매일",
-    enabled: true,
   };
 }
 
@@ -119,20 +114,6 @@ export function OperationScheduleForm({ values, onChange, kindLabel, disabled }:
             <option>사용자</option>
           </select>
         </div>
-      </div>
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-        <div>
-          <p className="text-[12px] font-medium text-foreground">구동 ON/OFF</p>
-          <p className="text-muted-foreground text-[10px]">출력 상태(목업)</p>
-        </div>
-        <Switch checked={values.driveOn} onCheckedChange={(c) => patch("driveOn", Boolean(c))} disabled={disabled} />
-      </div>
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-        <div>
-          <p className="text-[12px] font-medium text-foreground">사용</p>
-          <p className="text-muted-foreground text-[10px]">스케줄 활성(목업)</p>
-        </div>
-        <Switch checked={values.enabled} onCheckedChange={(c) => patch("enabled", Boolean(c))} disabled={disabled} />
       </div>
     </div>
   );

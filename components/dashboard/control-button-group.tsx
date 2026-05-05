@@ -2,10 +2,20 @@
 
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { AirVent, Droplets, Fan, Flame, PanelRightOpen, Plus, SunMedium, Waves } from "lucide-react";
+import {
+  AirVent,
+  Beaker,
+  Blinds,
+  Droplets,
+  Fan,
+  Flame,
+  PanelRightOpen,
+  Plus,
+  SunMedium,
+  Waves,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import type { OperationSchedule } from "@/lib/greenhouse/types";
 import { cn } from "@/lib/utils";
 
@@ -26,26 +36,27 @@ function ControlPair({
   inactiveLabel: string;
   onActive: () => void;
   onInactive: () => void;
-  /** 타이틀 옆 스케줄(이름 선택 등) — 온실 상세에서만 전달 */
   scheduleSlot?: ReactNode;
 }) {
   return (
-    <div className="group/ctrl flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-      <div className="flex min-w-0 flex-1 items-start gap-1.5 sm:items-center">
-        <Icon className="mt-0.5 size-2.5 shrink-0 stroke-[1] text-muted-foreground/80 sm:mt-0" aria-hidden />
+    <div className="group/ctrl flex w-full min-w-0 flex-row items-center justify-between gap-2 sm:gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
+        <div className="flex w-6 shrink-0 justify-center sm:w-7" aria-hidden>
+          <Icon className="size-3.5 stroke-[1] text-muted-foreground/80" />
+        </div>
         {scheduleSlot ? (
-          <div className="min-w-0 flex-1 text-muted-foreground">{scheduleSlot}</div>
+          <div className="flex min-h-7 min-w-0 flex-1 items-center text-muted-foreground">{scheduleSlot}</div>
         ) : (
-          <span className="text-foreground/85 truncate text-[12px] font-medium tracking-tight">{label}</span>
+          <span className="text-foreground/85 flex min-h-7 items-center truncate text-[11px] font-medium tracking-tight sm:text-[12px]">{label}</span>
         )}
       </div>
-      <div className="flex shrink-0 gap-0.5 self-end rounded-full border border-white/[0.06] bg-white/[0.04] p-0.5 sm:self-center">
+      <div className="flex shrink-0 justify-end gap-0.5 self-center rounded-full border border-white/[0.06] bg-white/[0.04] p-0.5">
         <Button
           type="button"
           variant={!active ? "secondary" : "ghost"}
           size="sm"
           className={cn(
-            "h-7 min-w-[2.5rem] rounded-full px-2 text-[11px] font-medium transition-colors duration-200",
+            "h-7 min-w-[2.25rem] rounded-full px-1.5 text-[10px] font-medium transition-colors duration-200 sm:min-w-[2.5rem] sm:px-2 sm:text-[11px]",
             !active && "bg-transparent text-muted-foreground hover:text-foreground"
           )}
           onClick={onInactive}
@@ -56,7 +67,10 @@ function ControlPair({
           type="button"
           variant={active ? "default" : "ghost"}
           size="sm"
-          className={cn("h-7 min-w-[2.5rem] rounded-full px-2 text-[11px] font-medium transition-colors duration-200", active && "shadow-sm")}
+          className={cn(
+            "h-7 min-w-[2.25rem] rounded-full px-1.5 text-[10px] font-medium transition-colors duration-200 sm:min-w-[2.5rem] sm:px-2 sm:text-[11px]",
+            active && "shadow-sm"
+          )}
           onClick={onActive}
         >
           {activeLabel}
@@ -68,8 +82,10 @@ function ControlPair({
 
 export type ControlButtonGroupKey =
   | "irrigation"
+  | "nutrientSupply"
   | "skylight"
   | "sideWindow"
+  | "thermalCurtain"
   | "flowFan"
   | "hotAirBlower"
   | "exhaustFan"
@@ -79,8 +95,10 @@ const DEFAULT_KEYS: ControlButtonGroupKey[] = ["irrigation", "skylight", "sideWi
 
 const KEY_TO_OPERATION: Record<ControlButtonGroupKey, OperationSchedule["kind"]> = {
   irrigation: "irrigation",
+  nutrientSupply: "nutrientSupply",
   skylight: "skylight",
   sideWindow: "sideWindow",
+  thermalCurtain: "thermalCurtain",
   flowFan: "flowFan",
   hotAirBlower: "hotAirBlower",
   exhaustFan: "exhaustFan",
@@ -93,8 +111,6 @@ export type ControlScheduleSlotProps = {
   selectedScheduleId: string | null | undefined;
   onSelectScheduleId: (id: string | null) => void;
   onTitleRegister: () => void;
-  onEdit: (id: string) => void;
-  onPatchSchedule: (id: string, patch: Partial<OperationSchedule>) => void;
 };
 
 function ScheduleSlot({
@@ -104,14 +120,11 @@ function ScheduleSlot({
   selectedScheduleId,
   onSelectScheduleId,
   onTitleRegister,
-  onEdit,
-  onPatchSchedule,
 }: ControlScheduleSlotProps & { label: string }) {
   const rows = schedules.filter((s) => s.kind === kind);
-  const sel = selectedScheduleId ? rows.find((r) => r.id === selectedScheduleId) : undefined;
 
   return (
-    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+    <div className="flex w-full min-w-0 flex-row items-stretch gap-1.5 sm:gap-2">
       <Button
         type="button"
         variant="outline"
@@ -120,52 +133,31 @@ function ScheduleSlot({
         aria-label={`${label} 스케줄 등록`}
         onClick={onTitleRegister}
         className={cn(
-          "h-7 shrink-0 touch-manipulation gap-1 rounded-full border-white/[0.1] bg-white/[0.04] px-2.5 text-[11px] font-semibold shadow-none",
+          "h-7 min-w-[5rem] max-w-[5.85rem] shrink-0 touch-manipulation gap-0.5 rounded-full border-white/[0.1] bg-white/[0.04] px-2 text-[10px] font-semibold shadow-none sm:min-w-[6.25rem] sm:max-w-[7.1rem] sm:gap-1 sm:px-2.5 sm:text-[11px] sm:justify-center",
           "hover:border-primary/35 hover:bg-primary/[0.1] hover:text-foreground",
           "active:scale-[0.98]",
           "focus-visible:ring-2 focus-visible:ring-ring/40"
         )}
       >
-        <Plus className="size-3 shrink-0 stroke-[1.75] opacity-80" aria-hidden />
-        {label}
+        <Plus className="size-2.5 shrink-0 stroke-[1.75] opacity-80 sm:size-3" aria-hidden />
+        <span className="min-w-0 truncate text-left">{label}</span>
       </Button>
       <select
         value={selectedScheduleId ?? ""}
         onChange={(e) => onSelectScheduleId(e.target.value || null)}
         className={cn(
-          "h-7 min-w-0 max-w-[min(100%,12rem)] flex-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-1.5 text-[11px] outline-none",
+          "h-7 min-h-7 min-w-0 flex-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-1 text-[10px] text-foreground outline-none sm:px-1.5 sm:text-[11px]",
           "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
         )}
         aria-label={`${label} 등록 스케줄 이름`}
       >
-        <option value="">이름</option>
+        <option value="">스케줄명 선택</option>
         {rows.map((r) => (
           <option key={r.id} value={r.id}>
             {r.name}
           </option>
         ))}
       </select>
-      {sel ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1">
-            <span className="text-muted-foreground text-[10px]">구동</span>
-            <Switch checked={Boolean(sel.driveOn)} onCheckedChange={(c) => onPatchSchedule(sel.id, { driveOn: Boolean(c) })} className="scale-90" />
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-muted-foreground text-[10px]">사용</span>
-            <Switch checked={Boolean(sel.enabled)} onCheckedChange={(c) => onPatchSchedule(sel.id, { enabled: Boolean(c) })} className="scale-90" />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 rounded-full border-white/[0.1] bg-white/[0.04] px-2.5 text-[10px] font-semibold shadow-none hover:border-primary/35 hover:bg-primary/[0.08]"
-            onClick={() => onEdit(sel.id)}
-          >
-            편집
-          </Button>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -176,20 +168,23 @@ export type ControlScheduleBundle = {
   selectedScheduleIdByKey: Partial<Record<ControlButtonGroupKey, string | null>>;
   onSelectScheduleIdByKey: (key: ControlButtonGroupKey, id: string | null) => void;
   onOpenScheduleRegister: (key: ControlButtonGroupKey) => void;
-  onOpenScheduleEdit: (key: ControlButtonGroupKey, id: string) => void;
 };
 
 export function ControlButtonGroup({
   irrigationOn,
+  nutrientSupplyOn = false,
   skylightOpen,
   sideWindowOpen,
+  thermalCurtainOpen = false,
   flowFanOn = false,
   hotAirBlowerOn = false,
   exhaustFanOn = false,
   sprayerOn = false,
   onIrrigationChange,
+  onNutrientSupplyChange,
   onSkylightChange,
   onSideWindowChange,
+  onThermalCurtainChange,
   onFlowFanChange,
   onHotAirBlowerChange,
   onExhaustFanChange,
@@ -199,30 +194,28 @@ export function ControlButtonGroup({
   className,
 }: {
   irrigationOn: boolean;
+  nutrientSupplyOn?: boolean;
   skylightOpen: boolean;
   sideWindowOpen: boolean;
+  thermalCurtainOpen?: boolean;
   flowFanOn?: boolean;
   hotAirBlowerOn?: boolean;
   exhaustFanOn?: boolean;
   sprayerOn?: boolean;
   onIrrigationChange: (next: boolean) => void;
+  onNutrientSupplyChange?: (next: boolean) => void;
   onSkylightChange: (next: boolean) => void;
   onSideWindowChange: (next: boolean) => void;
+  onThermalCurtainChange?: (next: boolean) => void;
   onFlowFanChange?: (next: boolean) => void;
   onHotAirBlowerChange?: (next: boolean) => void;
   onExhaustFanChange?: (next: boolean) => void;
   onSprayerChange?: (next: boolean) => void;
   visible?: readonly ControlButtonGroupKey[];
-  /** 온실 상세: 구분별 스케줄 등록·이름 선택 */
   schedule?: ControlScheduleBundle;
   className?: string;
 }) {
   const show = new Set(visible);
-
-  function patchById(id: string, patch: Partial<OperationSchedule>) {
-    if (!schedule) return;
-    schedule.onSchedulesChange(schedule.schedules.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-  }
 
   function slot(key: ControlButtonGroupKey, label: string): ReactNode | undefined {
     if (!schedule) return undefined;
@@ -235,14 +228,12 @@ export function ControlButtonGroup({
         selectedScheduleId={schedule.selectedScheduleIdByKey[key]}
         onSelectScheduleId={(id) => schedule.onSelectScheduleIdByKey(key, id)}
         onTitleRegister={() => schedule.onOpenScheduleRegister(key)}
-        onEdit={(id) => schedule.onOpenScheduleEdit(key, id)}
-        onPatchSchedule={patchById}
       />
     );
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2 sm:space-y-3", className)}>
       {show.has("irrigation") ? (
         <ControlPair
           icon={Waves}
@@ -253,6 +244,18 @@ export function ControlButtonGroup({
           inactiveLabel="끄기"
           onActive={() => onIrrigationChange(true)}
           onInactive={() => onIrrigationChange(false)}
+        />
+      ) : null}
+      {show.has("nutrientSupply") && onNutrientSupplyChange ? (
+        <ControlPair
+          icon={Beaker}
+          label="양액공급"
+          scheduleSlot={slot("nutrientSupply", "양액공급")}
+          active={nutrientSupplyOn}
+          activeLabel="켜기"
+          inactiveLabel="끄기"
+          onActive={() => onNutrientSupplyChange(true)}
+          onInactive={() => onNutrientSupplyChange(false)}
         />
       ) : null}
       {show.has("skylight") ? (
@@ -270,13 +273,25 @@ export function ControlButtonGroup({
       {show.has("sideWindow") ? (
         <ControlPair
           icon={PanelRightOpen}
-          label="측면창"
-          scheduleSlot={slot("sideWindow", "측면창")}
+          label="측창"
+          scheduleSlot={slot("sideWindow", "측창")}
           active={sideWindowOpen}
           activeLabel="열기"
           inactiveLabel="닫기"
           onActive={() => onSideWindowChange(true)}
           onInactive={() => onSideWindowChange(false)}
+        />
+      ) : null}
+      {show.has("thermalCurtain") && onThermalCurtainChange ? (
+        <ControlPair
+          icon={Blinds}
+          label="보온커튼"
+          scheduleSlot={slot("thermalCurtain", "보온커튼")}
+          active={thermalCurtainOpen}
+          activeLabel="열기"
+          inactiveLabel="닫기"
+          onActive={() => onThermalCurtainChange(true)}
+          onInactive={() => onThermalCurtainChange(false)}
         />
       ) : null}
       {show.has("flowFan") && onFlowFanChange ? (
