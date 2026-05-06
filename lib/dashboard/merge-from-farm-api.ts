@@ -73,7 +73,7 @@ export function mergeGreenhouseZoneFromFarmApi(
   };
 }
 
-type SensorPatch = Pick<GreenhouseZone, "tempC" | "humidityPct" | "soilPct">;
+type SensorPatch = Partial<Pick<GreenhouseZone, "tempC" | "humidityPct" | "soilPct">>;
 
 /** `/v1/sensors/latest` 읽기값으로 카드 온·습·토양수분만 덮어씁니다. */
 export function applyLatestSensorsToZones(zones: GreenhouseZone[], readings: SensorReadingDto[]): GreenhouseZone[] {
