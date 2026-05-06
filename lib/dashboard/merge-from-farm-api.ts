@@ -42,7 +42,13 @@ export function mergeGreenhouseZoneFromFarmApi(
   const t = template;
   const summaryMode: ControlMode = summary.mode === "MANUAL" ? "MANUAL" : "AUTO";
 
-  const skylightOpen = fleet ? fleet.skylightOpenPct > 0 : (t?.skylightOpen ?? false);
+  const hasLeft = fleet?.skylightLeftOpenPct != null;
+  const hasRight = fleet?.skylightRightOpenPct != null;
+  const skylightLeftOpen = hasLeft ? (fleet!.skylightLeftOpenPct! > 0) : (fleet ? fleet.skylightOpenPct > 0 : (t?.skylightLeftOpen ?? false));
+  const skylightRightOpen = hasRight
+    ? (fleet!.skylightRightOpenPct! > 0)
+    : (fleet ? fleet.skylightOpenPct > 0 : (t?.skylightRightOpen ?? false));
+  const skylightOpen = skylightLeftOpen || skylightRightOpen;
   const sideWindowOpen = fleet ? fleet.sideWindowOpenPct > 0 : (t?.sideWindowOpen ?? false);
 
   return {
@@ -57,8 +63,8 @@ export function mergeGreenhouseZoneFromFarmApi(
     healthStatus: healthFromApi(summary.health),
     irrigationRunning: fleet?.irrigationOn ?? t?.irrigationRunning ?? false,
     nutrientSupplyRunning: fleet?.nutrientSupplyActive ?? t?.nutrientSupplyRunning ?? false,
-    skylightLeftOpen: skylightOpen ? true : (t?.skylightLeftOpen ?? false),
-    skylightRightOpen: skylightOpen ? true : (t?.skylightRightOpen ?? false),
+    skylightLeftOpen,
+    skylightRightOpen,
     sideWindowLeftOpen: sideWindowOpen ? true : (t?.sideWindowLeftOpen ?? false),
     sideWindowRightOpen: sideWindowOpen ? true : (t?.sideWindowRightOpen ?? false),
     skylightOpen,

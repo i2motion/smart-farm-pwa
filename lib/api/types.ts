@@ -189,6 +189,8 @@ export type DeviceFleetStatusDto = {
     irrigationOn: boolean;
     nutrientSupplyActive: boolean;
     skylightOpenPct: number;
+    skylightLeftOpenPct?: number;
+    skylightRightOpenPct?: number;
     sideWindowOpenPct: number;
     circulationFanOn: boolean;
     heaterOn: boolean;

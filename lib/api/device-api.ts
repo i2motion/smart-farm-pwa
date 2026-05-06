@@ -10,14 +10,10 @@
  * - `fleet-device-controls.tsx`, `greenhouse-device-panel.tsx`, `control-button-group.tsx`:
  *   버튼 onClick → 확인 → 여기 해당 함수 호출.
  *
- * 영양액 공급 시작/중지는 `nutrient-api.ts`와 동일 엔드포인트를 사용합니다(중복 HTTP 방지).
+ * 영양액 공급은 온실별 `/v1/greenhouses/{id}/nutrient-supply/*` 경로를 사용합니다.
  */
 
 import { farmRequest } from "@/lib/api/api-client";
-import {
-  startNutrientSupply as nutrientStartNutrientSupply,
-  stopNutrientSupply as nutrientStopNutrientSupply,
-} from "@/lib/api/nutrient-api";
 import type { ApiResult, CommandAcceptedDto, DeviceFleetStatusDto, GreenhouseControlMode } from "@/lib/api/types";
 
 export async function getDeviceStatus(): Promise<ApiResult<DeviceFleetStatusDto>> {
@@ -37,14 +33,18 @@ export async function setGreenhouseMode(
   );
 }
 
-/** 고위험 — 영양액 공급. 확인 후 호출. `nutrient-api.startNutrientSupply`와 동일. */
-export function startNutrientSupply(targetGreenhouseIds: string[]) {
-  return nutrientStartNutrientSupply(targetGreenhouseIds);
+export async function startGreenhouseNutrientSupply(greenhouseId: string): Promise<ApiResult<CommandAcceptedDto>> {
+  return farmRequest<CommandAcceptedDto>(
+    `/v1/greenhouses/${encodeURIComponent(greenhouseId)}/nutrient-supply/start`,
+    { method: "POST", jsonBody: {} }
+  );
 }
 
-/** 영양액 공급 중지 */
-export function stopNutrientSupply() {
-  return nutrientStopNutrientSupply();
+export async function stopGreenhouseNutrientSupply(greenhouseId: string): Promise<ApiResult<CommandAcceptedDto>> {
+  return farmRequest<CommandAcceptedDto>(
+    `/v1/greenhouses/${encodeURIComponent(greenhouseId)}/nutrient-supply/stop`,
+    { method: "POST", jsonBody: {} }
+  );
 }
 
 export async function startWaterSupply(greenhouseId: string): Promise<ApiResult<CommandAcceptedDto>> {
